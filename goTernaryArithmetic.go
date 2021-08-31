@@ -39,7 +39,7 @@ func int2trit(i int8) trit {
 	return nil
 }
 
-// Таб.2 Троичное сложение
+// Таб.2 Полусумматор тритов
 // .------------------------.
 // |     | -1  |  0  |  1   |
 // |------------------------|
@@ -50,8 +50,8 @@ func int2trit(i int8) trit {
 // |  1  |  0  |  1  |  +-  |
 // .------------------------.
 
-// Троичное сложение двух тритов с переносом
-func add_t(a trit, b trit) (c trit, carry trit) {
+// Полусумматор двух тритов с переносом
+func add_half_t(a trit, b trit) (c trit, carry trit) {
 
 	if a == false && b == false {
 		return true, false
@@ -73,6 +73,20 @@ func add_t(a trit, b trit) (c trit, carry trit) {
 		return false, true
 	}
 	return nil, nil
+}
+
+//Перенос из n-1   -1  -1  -1   1   1   1
+//1-е слагаемое	   -1  -1  -1   1   1   1
+//2-е слагаемое	   -1 	0	1  -1   0   1
+//Сумма   	        0   1  -1   1  -1   0
+//Перенос в n+1	   -1  -1	0   0   1   1
+
+// Полный сумматор двух тритов с переносом
+func add_full_t(a trit, b trit, incarry trit) (c trit, outcarry trit) {
+	s, sc := add_half_t(a, b)
+	d, dc := add_half_t(s, incarry)
+	ss, _ := add_half_t(sc, dc)
+	return d, ss
 }
 
 // Таб.3 Троичное умножение
@@ -105,87 +119,24 @@ func mul_t(a trit, b trit) trit {
 // ----------
 func main() {
 
+	fmt.Printf("Run funcs ---------------------\n")
+
 	// Троичные переменные
-	var t trit
-	var tr tryte
-	var s, carry trit
+	var a trit
+	var b trit
+	var c trit
+	var carry trit
 
-	// Тесты
-	fmt.Println("\nt1: trit = NIL ")
-	t = nil
-	fmt.Printf("t == nil : %v \n", t == nil)
-	fmt.Printf("t == true : %v \n", t == true)
-	fmt.Printf("t == false : %v \n", t == false)
+	a = nil
+	b = true
+	c = false
+	carry = true
 
-	fmt.Println("\nt2: t = TRUE ")
-	t = true
-	fmt.Printf("t == nil : %v \n", t == nil)
-	fmt.Printf("t == true : %v \n", t == true)
-	fmt.Printf("t == false : %v \n", t == false)
+	fmt.Printf("a=%d, b=%d, c=%d, carry=%d   \n", trit2int(a), trit2int(b), trit2int(c), trit2int(carry))
 
-	fmt.Println("\nt3: t = FALSE ")
-	t = false
-	fmt.Printf("t == nil : %v \n", t == nil)
-	fmt.Printf("t == true : %v \n", t == true)
-	fmt.Printf("t == false : %v \n", t == false)
+	sf, sfc := add_full_t(a, b, carry)
 
-	fmt.Println("\nt4: tryte ")
-	fmt.Printf("tryte = %v \n", tr)
+	fmt.Printf("add_full_t( %d, %d, %d ) = %d,%d \n", trit2int(a), trit2int(b), trit2int(carry), trit2int(sf), trit2int(sfc))
 
-	fmt.Println("\nt5: tryte]")
-	tr[0] = true
-	tr[1] = false
-	fmt.Printf("tryte = %v \n", tr)
-
-	fmt.Println("\nt6: trit2int()")
-	fmt.Printf("trit2int(true) = %v \n", trit2int(true))
-	fmt.Printf("trit2int(nil) = %v \n", trit2int(nil))
-	fmt.Printf("trit2int(false) = %v \n", trit2int(false))
-
-	fmt.Println("\nt7: int2trit(...)")
-	fmt.Printf("int2trit(1) = %v \n", int2trit(1))
-	fmt.Printf("int2trit(0) = %v \n", int2trit(0))
-	fmt.Printf("int2trit(-1) = %v \n", int2trit(-1))
-
-	fmt.Println("\nt8: add_t(...) --------")
-	s, carry = add_t(false, false)
-	fmt.Printf("add_t( -1 + -1) => %v, %v \n", s, carry)
-	s, carry = add_t(false, nil)
-	fmt.Printf("add_t( -1 +  0) => %v, %v \n", s, carry)
-	s, carry = add_t(false, true)
-	fmt.Printf("add_t( -1 +  1) => %v, %v \n", s, carry)
-	s, carry = add_t(nil, false)
-	fmt.Printf("add_t(  0 + -1) => %v, %v \n", s, carry)
-	s, carry = add_t(nil, nil)
-	fmt.Printf("add_t(  0 +  0) => %v, %v \n", s, carry)
-	s, carry = add_t(nil, true)
-	fmt.Printf("add_t(  0 +  1) => %v, %v \n", s, carry)
-	s, carry = add_t(true, false)
-	fmt.Printf("add_t(  1 + -1) => %v, %v \n", s, carry)
-	s, carry = add_t(true, nil)
-	fmt.Printf("add_t(  1 +  0) => %v, %v \n", s, carry)
-	s, carry = add_t(true, true)
-	fmt.Printf("add_t(  1 +  1) => %v, %v \n", s, carry)
-
-	fmt.Println("\nt9: mul_t(...) --------")
-	s = mul_t(false, false)
-	fmt.Printf("mul_t( -1 * -1) => %v \n", s)
-	s = mul_t(false, nil)
-	fmt.Printf("mul_t( -1 *  0) => %v \n", s)
-	s = mul_t(false, true)
-	fmt.Printf("mul_t( -1 *  1) => %v \n", s)
-	s = mul_t(nil, false)
-	fmt.Printf("mul_t(  0 * -1) => %v \n", s)
-	s = mul_t(nil, nil)
-	fmt.Printf("mul_t(  0 *  0) => %v \n", s)
-	s = mul_t(nil, true)
-	fmt.Printf("mul_t(  0 *  1) => %v \n", s)
-	s = mul_t(true, false)
-	fmt.Printf("mul_t(  1 * -1) => %v \n", s)
-	s = mul_t(true, nil)
-	fmt.Printf("mul_t(  1 *  0) => %v \n", s)
-	s = mul_t(true, true)
-	fmt.Printf("mul_t(  1 *  1) => %v \n", s)
-
-	fmt.Printf("---------------------\n")
+	fmt.Printf("--------------------------------\n")
 }
