@@ -147,6 +147,48 @@ func TestMulTrits(t *testing.T) {
 	t.Log("right")
 }
 
+func TestPow3(t *testing.T) {
+	var i int8
+	for i = 0; i < 18; i++ {
+		fmt.Printf("pow3(%d)=%v\n", i, pow3(i))
+	}
+}
+func TestShift(t *testing.T) {
+	// Троичные переменные
+	var x tryte
+	var z tryte
+
+	x[1] = true
+	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	rx := shift_ts(x, -1)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -1, reverseTryte(rx[:]))
+	rx = shift_ts(rx, 1)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 1, reverseTryte(rx[:]))
+	x = z
+	x[0] = true
+	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	rx = shift_ts(x, -5)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, reverseTryte(rx[:]))
+	x = z
+	x[5] = false
+	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	rx = shift_ts(x, 5)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, reverseTryte(rx[:]))
+}
+
+func BenchmarkPow3(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		pow3(18)
+	}
+}
+
+func BenchmarkShift_ts(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		var x tryte
+		shift_ts(x, 5)
+	}
+}
+
 func BenchmarkCalculate(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s = mul_t(false, true)

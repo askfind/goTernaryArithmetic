@@ -13,9 +13,12 @@ import (
 // | Логика                   | false |  nil  | true  |
 // +--------------------------+-------+-------+-------+
 
+//
+// TRIT Arithmetic
+//
+
 // Объявление троичных типов
 type trit interface{}
-type tryte [6]interface{}
 
 // Преобразование трита в целое число
 func trit2int(t trit) int8 {
@@ -114,12 +117,90 @@ func mul_t(a trit, b trit) trit {
 	return nil
 }
 
+//
+// TRYTE
+//
+
+// t5t4t3t2t1t0
+type tryte [6]interface{}
+
+//
+// Операция сдвига тритов
+//
+// Параметр:
+// if(d > 0) then "Вправо"
+// if(d == 0) then "Нет сдвига"
+// if(d < 0) then "Влево"
+// Возврат: Троичное число
+//
+func shift_ts(x tryte, d int8) tryte {
+	var tr tryte = x
+	var n int8
+	var s int8
+
+	if d == 0 {
+		return tr
+	} else if d < 0 {
+		n = -d
+	} else {
+		n = d
+	}
+	if d > 0 {
+		for s = 0; s < n; s++ {
+			for i := 0; i < len(tr)-1; i++ {
+				tr[i] = tr[i+1]
+			}
+			id := len(tr) - 1
+			tr[id] = nil
+		}
+	} else if d < 0 {
+		for s = 0; s < n; s++ {
+			for i := len(tr) - 1; i > 0; i-- {
+				tr[i] = tr[i-1]
+			}
+			tr[0] = nil
+		}
+	}
+	return tr
+}
+
+//
+// Functions
+//
+// Изменить порядок тритов в трайте
+func reverseTryte(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(reverseTryte(input[1:]), input[0])
+}
+
+// Изменить порядок тритов в трайте
+func printTryte(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(printTryte(input[1:]), trit2int(input[0]))
+}
+
+// Возведение в степень по модулю 3
+func pow3(x int8) int32 {
+	var i int8
+	var r int32 = 1
+	for i = 0; i < x; i++ {
+		r *= 3
+	}
+	return r
+}
+
 // ----------
 // Main
 // ----------
 func main() {
 
 	fmt.Printf("Run funcs ---------------------\n")
+
+	fmt.Printf("- calculate trit  --------------\n")
 
 	// Троичные переменные
 	var a trit
@@ -137,6 +218,22 @@ func main() {
 	sf, sfc := add_full_t(a, b, carry)
 
 	fmt.Printf("add_full_t( %d, %d, %d ) = %d,%d \n", trit2int(a), trit2int(b), trit2int(carry), trit2int(sf), trit2int(sfc))
+
+	fmt.Printf("- calculate tryte  --------------\n")
+	// Троичные переменные
+	var x tryte
+	var rx tryte
+	var z tryte
+
+	x[0] = true
+	fmt.Printf("x = %v \n", printTryte(x[:]))
+	rx = shift_ts(x, -5)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryte(rx[:]))
+	x = z
+	x[5] = false
+	fmt.Printf("x = %v \n", printTryte(x[:]))
+	rx = shift_ts(x, 5)
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryte(rx[:]))
 
 	fmt.Printf("--------------------------------\n")
 }
