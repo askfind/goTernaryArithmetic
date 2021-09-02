@@ -14,7 +14,7 @@ import (
 // +--------------------------+-------+-------+-------+
 // | Символы (вар.3)          |   N   |	  O   |	  P   |
 // +--------------------------+-------+-------+-------+
-// | Символы (вар.4)          |   0   |	  i   |	  1   | 
+// | Символы (вар.4)          |   0   |	  i   |	  1   |
 // +--------------------------+-------+-------+-------+
 // | Логика                   | false |  nil  | true  |
 // +--------------------------+-------+-------+-------+
@@ -103,9 +103,9 @@ func add_half_t(a trit, b trit) (c trit, carry trit) {
 // | Перенос из n-1   -1  -1  -1   1   1   1 |
 // | 1-е слагаемое    -1  -1  -1   1   1   1 |
 // | 2-е слагаемое    -1   0   1  -1   0   1 |
-// | Сумма   	       0   1  -1   1  -1   0 | 
+// | Сумма   	       0   1  -1   1  -1   0 |
 // | Перенос в n+1    -1  -1   0   0   1   1 |
-// .-----------------------------------------.  
+// .-----------------------------------------.
 // Полный сумматор двух тритов с переносом
 func add_full_t(a trit, b trit, incarry trit) (c trit, outcarry trit) {
 	s, sc := add_half_t(a, b)
@@ -115,7 +115,7 @@ func add_full_t(a trit, b trit, incarry trit) (c trit, outcarry trit) {
 }
 
 // Таб.4 Троичное умножение
-//       MUL 
+//       MUL
 // .-----------------------.
 // |     | -1  |  0  |  1  |
 // |-----------------------|
@@ -149,16 +149,14 @@ func mul_t(a trit, b trit) trit {
 // |-----------|
 // |  +  |  -  |
 // .-----------.
-
-// Таб.6 Троичное отрицание
-//       NOT
-// .-----------.
-// |  -  |  +  |
-// |-----------|
-// |  0  |  0  |
-// |-----------|
-// |  +  |  -  |
-// .-----------.
+func not_t(a trit) trit {
+	if a == false {
+		return true
+	} else if a == true {
+		return false
+	}
+	return nil
+}
 
 // Таб.6 Троичное умножение
 //       AND
@@ -171,7 +169,30 @@ func mul_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
-//  X AND Y = MIN(X,Y) 
+//  X AND Y = MIN(X,Y)
+// Троичное умножение двух тритов с переносом
+func and_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return false
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
 // Таб.7 Троичное или
 //       OR
@@ -185,6 +206,28 @@ func mul_t(a trit, b trit) trit {
 // |  1  |  +  |  +  |  +  |
 // .-----------------------.
 //   X OR Y = MAX(X,Y)
+func or_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return true
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
 // Таб.8 Троичное исключающее или
 //       XOR
@@ -197,9 +240,30 @@ func mul_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  +  |  0  |  -  |
 // .-----------------------.
+func xor_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
 
-  
-// Таб.9 Троичное 
+// Таб.9 Троичное
 //       EQV
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -211,8 +275,30 @@ func mul_t(a trit, b trit) trit {
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
 // EQV(X,Y) = NOT (XOR(X,Y))
+func eqv_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
-// Таб.10 Троичное 
+// Таб.10 Троичное
 //       NAND
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -224,8 +310,30 @@ func mul_t(a trit, b trit) trit {
 // |  1  |  +  |  0  |  -  |
 // .-----------------------.
 // NAND(X,Y) = NOT (AND(X,Y))
+func nand_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return true
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
 
-// Таб.11 Троичное 
+// Таб.11 Троичное
 //       NOR
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -237,8 +345,30 @@ func mul_t(a trit, b trit) trit {
 // |  1  |  -  |  -  |  -  |
 // .-----------------------.
 // NOR(X,Y) = NOT((OR(X,Y))
+func nor_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return false
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return false
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
 
-// Таб.12 Троичное 
+// Таб.12 Троичное
 //       IMP
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -249,6 +379,28 @@ func mul_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
+func imp_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return true
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
 // Таб.13 Троичное исключающее максимального
 //        XMAX
@@ -265,10 +417,30 @@ func mul_t(a trit, b trit) trit {
 //	F = MAX(A,B), если A != B
 //	    0	    , если A == B
 //	(имейте в виду - это не XOR).
+func xmax_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return false
+	} else if a == nil && b == true {
+		return true
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
 
-
-
-// Таб.14 Троичное Инверсно Исключающий минимального 
+// Таб.14 Троичное Инверсно Исключающий минимального
 //        IXMAX
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -279,8 +451,30 @@ func mul_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
+func ixmax_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
-// Таб.15 Троичное Инверсно Исключающий минимального 
+// Таб.15 Троичное Инверсно Исключающий минимального
 //        MEAN
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -296,8 +490,30 @@ func mul_t(a trit, b trit) trit {
 //	Если ii, то возращает 1
 //	Если iX или Xi, то возращает i
 //	Иначе 0
- 
-// Таб.16 Троичное Инверсно Исключающий минимального 
+func mean_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
+
+// Таб.16 Троичное Инверсно Исключающий минимального
 //        Magnitude
 // .-----------------------.
 // |     | -1  |  0  |  1  |
@@ -309,12 +525,33 @@ func mul_t(a trit, b trit) trit {
 // |  1  |  +  |  +  |  0  |
 // .-----------------------.
 // Magnitude:
-//	Сравнение 
+//	Сравнение
 //	(Функция нессимитричная)
 //	Возращает 0, если A < B
 //		  i, если A = B
 //		  1, если A > B
-
+func magnitude_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return nil
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return false
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return nil
+	}
+	return nil
+}
 
 // Таб.17 Троичное дополнительный код
 //        NEG
@@ -325,11 +562,19 @@ func mul_t(a trit, b trit) trit {
 // |-----------|
 // |  +  |  0  |
 // .-----------.
+func neg_t(a trit) trit {
+	if a == false {
+		return false
+	} else if a == nil {
+		return true
+	}
+	return nil
+}
 
 // Расмотрим еще некоторые функции
 // { -, 0, + }
 //
-//  Сложение по модулю       
+//  Сложение по модулю
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -337,7 +582,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | -  0  +
 //	+ | 0  +  -
 //	--+----------
-//
+func add_mod_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return nil
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return true
+	} else if a == true && b == false {
+		return nil
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
+
 //  Перенос в сложении по модулю
 //	--+----------
 //	  | -  0  +
@@ -346,7 +613,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | 0  0  +
 //	--+----------
-//
+func carry_add_mod_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return nil
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return nil
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
 //  Сложение с насышением
 //	--+----------
 //	  | -  0  +
@@ -355,6 +644,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | -  0  +
 //	+ | 0  +  +
 //	--+----------
+func add_satiation_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return nil
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return true
+	} else if a == true && b == false {
+		return nil
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
 //
 //  Функция Webb
 //	--+----------
@@ -364,7 +676,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | +  +  -
 //	+ | -  -  -
 //	--+----------
-//
+func webb_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return nil
+	} else if a == false && b == nil {
+		return true
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return false
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return false
+	} else if a == true && b == true {
+		return false
+	}
+	return nil
+}
+
 //   Тождество (строгоe)
 //	--+----------
 //	  | -  0  +
@@ -373,7 +707,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | -  +  -
 //	+ | -  -  +
 //	--+----------
-//
+func identity_strict_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return false
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return false
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
 //   Тождество (weak)
 //	--+----------
 //	  | -  0  +
@@ -382,8 +738,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | 0  0  0      в общем как умножение
 //	+ | -  0  +
 //	--+----------
-//
-//    Коньюнкция Лукашевича (сильная)
+func weak_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Коньюнкция Лукашевича (сильная)
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -391,7 +769,29 @@ func mul_t(a trit, b trit) trit {
 //	0 | -  -  0
 //	+ | -  0  +
 //	--+----------
-//
+func conjunction_lukashevich_strong_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return false
+	} else if a == nil && b == nil {
+		return false
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
 //  Импликация Лукашевича
 //	--+----------
 //	  | -  0  +
@@ -400,8 +800,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | +  +  0
 //	+ | +  +  +
 //	--+----------
-//
-//     Коньюнкция Клини
+func lukashevich_implication_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Коньюнкция Клини
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -409,8 +831,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | -  0  +
 //	--+----------
-//
-//     Импликация Клини 	
+func klini_conjunction_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return false
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Импликация Клини
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -418,8 +862,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | -  0  +
 //	--+----------
-//
-//     Интуиционистская импликация Геделя 
+func implication_clinic_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return true
+	} else if a == false && b == true {
+		return true
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return false
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Интуиционистская импликация Геделя
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -427,8 +893,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | +  +  0
 //	+ | +  +  +
 //	--+----------
-//
-//      Материальная импликация	
+func goedel_intuitionistic_implication_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return false
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return true
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Материальная импликация
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -436,8 +924,30 @@ func mul_t(a trit, b trit) trit {
 //	0 | +  0  0
 //	+ | +  +  +
 //	--+----------
-//
-//    Функция следования Брусенцова
+func material_implication_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return true
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return true
+	} else if a == true && b == nil {
+		return true
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
+
+//  Функция следования Брусенцова
 //	--+----------
 //	  | -  0  +
 //	--+----------
@@ -445,6 +955,28 @@ func mul_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | 0  0  +
 //	--+----------
+func following_brusentsov_t(a trit, b trit) trit {
+	if a == false && b == false {
+		return true
+	} else if a == false && b == nil {
+		return nil
+	} else if a == false && b == true {
+		return false
+	} else if a == nil && b == false {
+		return nil
+	} else if a == nil && b == nil {
+		return nil
+	} else if a == nil && b == true {
+		return nil
+	} else if a == true && b == false {
+		return nil
+	} else if a == true && b == nil {
+		return nil
+	} else if a == true && b == true {
+		return true
+	}
+	return nil
+}
 
 //
 // TRYTE
