@@ -1062,6 +1062,41 @@ func pow3(x int8) int32 {
 	return r
 }
 
+//
+// Троичное сложение двух тритов с переносом
+//
+func sum_t(a int, b int, p0 int) (int, int) {
+
+	s := a + b + p0
+	switch s {
+	case -3:
+		return 0, 1
+		break
+	case -2:
+		return 1, -1
+		break
+	case -1:
+		return -1, 0
+		break
+	case 0:
+		return 0, 0
+		break
+	case 1:
+		return 1, 0
+		break
+	case 2:
+		return -1, 1
+		break
+	case 3:
+		return 0, 1
+		break
+	default:
+		return 0, 0
+		break
+	}
+	return 0, 0
+}
+
 // ----------
 // Main
 // ----------

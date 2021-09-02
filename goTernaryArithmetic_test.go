@@ -201,6 +201,12 @@ func BenchmarkMul_t(b *testing.B) {
 	}
 }
 
+func BenchmarkSum_t(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		sum_t(1, 1, 1)
+	}
+}
+
 //func BenchmarkCalculate(b *testing.B) {
 //	for i := 0; i < b.N; i++ {
 //	}
