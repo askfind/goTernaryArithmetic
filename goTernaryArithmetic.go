@@ -42,6 +42,17 @@ func int2trit(i int8) trit {
 	return nil
 }
 
+//  Преобразовать трит в символ '-','0','+'
+func trit2symb(t trit) string {
+	if t == false {
+		return "-"
+	} else if t == nil {
+		return "0"
+	} else {
+		return "+"
+	}
+}
+
 // Таб.2 Полусумматор тритов
 // .------------------------.
 // |     | -1  |  0  |  1   |
@@ -176,11 +187,19 @@ func reverseTryte(input []interface{}) []interface{} {
 }
 
 // Изменить порядок тритов в трайте
-func printTryte(input []interface{}) []interface{} {
+func printTryteInt(input []interface{}) []interface{} {
 	if len(input) == 0 {
 		return input
 	}
-	return append(printTryte(input[1:]), trit2int(input[0]))
+	return append(printTryteInt(input[1:]), trit2int(input[0]))
+}
+
+// Изменить порядок тритов в трайте
+func printTryteSymb(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
 }
 
 // Возведение в степень по модулю 3
@@ -226,14 +245,24 @@ func main() {
 	var z tryte
 
 	x[0] = true
-	fmt.Printf("x = %v \n", printTryte(x[:]))
+	x[1] = false
+	x[2] = nil
+	x[3] = true
+	x[4] = false
+	x[5] = nil
+
+	fmt.Printf("x = %v \n", printTryteInt(x[:]))
+	fmt.Printf("x = %v \n", printTryteSymb(x[:]))
 	rx = shift_ts(x, -5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryteInt(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryteSymb(rx[:]))
 	x = z
 	x[5] = false
-	fmt.Printf("x = %v \n", printTryte(x[:]))
+	fmt.Printf("x = %v \n", printTryteInt(x[:]))
+	fmt.Printf("x = %v \n", printTryteSymb(x[:]))
 	rx = shift_ts(x, 5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteInt(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteSymb(rx[:]))
 
 	fmt.Printf("--------------------------------\n")
 }

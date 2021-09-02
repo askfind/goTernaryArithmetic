@@ -159,21 +159,21 @@ func TestShift(t *testing.T) {
 	var z tryte
 
 	x[1] = true
-	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	fmt.Printf("x = %v \n", printTryteInt(x[:]))
 	rx := shift_ts(x, -1)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", -1, reverseTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -1, printTryteInt(rx[:]))
 	rx = shift_ts(rx, 1)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", 1, reverseTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 1, printTryteInt(rx[:]))
 	x = z
 	x[0] = true
-	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	fmt.Printf("x = %v \n", printTryteInt(x[:]))
 	rx = shift_ts(x, -5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, reverseTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryteInt(rx[:]))
 	x = z
 	x[5] = false
-	fmt.Printf("x = %v \n", reverseTryte(x[:]))
+	fmt.Printf("x = %v \n", printTryteInt(x[:]))
 	rx = shift_ts(x, 5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, reverseTryte(rx[:]))
+	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteInt(rx[:]))
 }
 
 func BenchmarkPow3(b *testing.B) {
@@ -189,8 +189,19 @@ func BenchmarkShift_ts(b *testing.B) {
 	}
 }
 
-func BenchmarkCalculate(b *testing.B) {
+func BenchmarkAdd_full_t(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s, carry = add_full_t(false, false, false)
+	}
+}
+
+func BenchmarkMul_t(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s = mul_t(false, true)
 	}
 }
+
+//func BenchmarkCalculate(b *testing.B) {
+//	for i := 0; i < b.N; i++ {
+//	}
+//}
