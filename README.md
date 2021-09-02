@@ -19,5 +19,3 @@ go build
 ```
 
 _To be continued..._
-
-//edu
