@@ -21,12 +21,12 @@ import (
 // | Логика                   | false |  nil  | true  |
 // +--------------------------+-------+-------+-------+
 
-// В троичной логике только 729 коммутативных двухоперандных функций из 19,683
-// т.е. таких что F(A,B) = F(B,A)
+// В троичной логике только 729 коммутативных двухоперандных
+// функций из 19,683, т.е. таких что F(A,B) = F(B,A)
 
-//
+// ----------------------------------------------------
 // TRIT Arithmetic
-//
+// ----------------------------------------------------
 
 // Объявление троичных типов
 type trit interface{}
@@ -981,11 +981,98 @@ func following_brusentsov_t(a trit, b trit) trit {
 }
 
 //
-// TRYTE
+// Троичное сложение двух тритов с переносом
+// (Для измерения производительности операций int)
 //
+func sum_t(a int, b int, p0 int) (int, int) {
+
+	s := a + b + p0
+	switch s {
+	case -3:
+		return 0, 1
+		break
+	case -2:
+		return 1, -1
+		break
+	case -1:
+		return -1, 0
+		break
+	case 0:
+		return 0, 0
+		break
+	case 1:
+		return 1, 0
+		break
+	case 2:
+		return -1, 1
+		break
+	case 3:
+		return 0, 1
+		break
+	default:
+		return 0, 0
+		break
+	}
+	return 0, 0
+}
+
+//
+// Реализация чтение трита
+//
+func get_trit(t1 uint32, t0 uint32, p uint8) int {
+	var trit int
+	if (t0 & (1 << p)) == 0 {
+		trit = 0
+	} else {
+		if (t1 & (1 << p)) == 0 {
+			trit = -1
+		} else {
+			trit = 1
+		}
+	}
+	return trit
+}
+
+// ----------------------------------------------------
+// TRYTE
+// ----------------------------------------------------
 
 // t5t4t3t2t1t0
 type tryte [6]interface{}
+
+// Изменить порядок тритов в трайте
+func reverseTryte(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(reverseTryte(input[1:]), input[0])
+}
+
+// Изменить порядок тритов в трайте
+func printTryteInt(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(printTryteInt(input[1:]), trit2int(input[0]))
+}
+
+// Изменить порядок тритов в трайте
+func printTryteSymb(input []interface{}) []interface{} {
+	if len(input) == 0 {
+		return input
+	}
+	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
+}
+
+// Возведение в степень по модулю 3
+func pow3(x int8) int32 {
+	var i int8
+	var r int32 = 1
+	for i = 0; i < x; i++ {
+		r *= 3
+	}
+	return r
+}
 
 //
 // Операция сдвига тритов
@@ -1027,81 +1114,70 @@ func shift_ts(x tryte, d int8) tryte {
 	return tr
 }
 
-//
-// Functions
-//
-// Изменить порядок тритов в трайте
-func reverseTryte(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
-	}
-	return append(reverseTryte(input[1:]), input[0])
-}
+// **************************************
+// *  Определение регистров "Сетунь-1958"
+// *-------------------------------------
 
-// Изменить порядок тритов в трайте
-func printTryteInt(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
-	}
-	return append(printTryteInt(input[1:]), trit2int(input[0]))
-}
+// Троичные типы данных
+type tr1 [1]interface{}
+type tr4 [4]interface{}
+type tr5 [5]interface{}
+type tr9 [9]interface{}
+type tr18 [18]interface{}
+type lts interface{}
 
-// Изменить порядок тритов в трайте
-func printTryteSymb(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
-	}
-	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
-}
+// Основные регистры в порядке пульта управления
+var (
+	K tr9 // K(1:9)  код команды (адрес ячейки оперативной памяти)
+	F tr5 // F(1:5)  индекс регистр
+	C tr5 // C(1:5)  программный счетчик
+	W tr1 // W(1:1)  знак троичного числа
+	//
+	ph1 tr1  // ph1(1:1) 1 разряд переполнения
+	ph2 tr1  // ph2(1:1) 2 разряд переполнения
+	S   tr18 // S(1:18) аккумулятор
+	R   tr18 // R(1:18) регистр множителя
+	MB  tr4  // MB(1:4) троичное число зоны магнитного барабана
+	// Дополнительный
+	MR tr9 // временный регистр для обмена троичным числом
+)
 
-// Возведение в степень по модулю 3
-func pow3(x int8) int32 {
-	var i int8
-	var r int32 = 1
-	for i = 0; i < x; i++ {
-		r *= 3
-	}
-	return r
-}
+// Сложение  в  S (S)+(A*)=>(S)
+//func add_tr(x lts ,y lts ) lts  {
+//     return nil
+//}
 
-//
-// Троичное сложение двух тритов с переносом
-//
-func sum_t(a int, b int, p0 int) (int, int) {
+// Вычитание в  S (S)-(A*)=>(S)
+//func add_tr(x interface ,y interface ) interface  {
+//     return nil
+//}
 
-	s := a + b + p0
-	switch s {
-	case -3:
-		return 0, 1
-		break
-	case -2:
-		return 1, -1
-		break
-	case -1:
-		return -1, 0
-		break
-	case 0:
-		return 0, 0
-		break
-	case 1:
-		return 1, 0
-		break
-	case 2:
-		return -1, 1
-		break
-	case 3:
-		return 0, 1
-		break
-	default:
-		return 0, 0
-		break
-	}
-	return 0, 0
-}
+// Умножение 0 (S)=>(R); (A*)(R)=>(S)
+//func mulz_tr(x trs,y trs) trs {
+//     return nil
+//}
 
-// ----------
+// Умножение + (S)+(A*)(R)=>(S)
+//func mulp_tr(x trs,y trs) trs {
+//     return nil
+//}
+
+// Умножение - (A*)+(S)(R)=>(S)
+//func muln_tr(x trs,y trs) trs {
+//     return nil
+//}
+
+// Поразрядное умножение (A*)[x](S)=>(S)
+//func and_tr(x trs,y trs) trs {
+//     return nil
+//}
+
+// Посылка в R (A*)=>(R)
+// Нормализация	Норм.(S)=>(A*); (N)=>(S)
+
+// ---------------------------------------------------
 // Main
-// ----------
+// ---------------------------------------------------
 func main() {
 
 	fmt.Printf("Run funcs ---------------------\n")
@@ -1150,6 +1226,37 @@ func main() {
 	rx = shift_ts(x, 5)
 	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteInt(rx[:]))
 	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteSymb(rx[:]))
+
+	// test get_trit()
+	var t1 uint32
+	var t0 uint32
+	var p uint8
+
+	fmt.Printf("Test print trt:\n")
+	// -1
+	p = 0
+	t1 = t1 &^ (1 << p)
+	t0 |= (1 << p)
+	trt := get_trit(t1, t0, p)
+	fmt.Printf(" trt=% 2d\n", trt)
+	// 0
+	p = 0
+	t0 = t0 &^ 1
+	trt = get_trit(t1, t0, p)
+	fmt.Printf(" trt=% 2d\n", trt)
+	// 1
+	p = 0
+	t1 |= (1 << p)
+	t0 |= (1 << p)
+	trt = get_trit(t1, t0, p)
+	fmt.Printf(" trt=% 2d\n", trt)
+
+	// Сдвиг
+	fmt.Printf("Shift to the left {t1,t0}<<= 2:\n")
+	t1 <<= 2
+	t0 <<= 2
+	trt = get_trit(t1, t0, 2)
+	fmt.Printf(" shift trt=% 2d\n", trt)
 
 	fmt.Printf("--------------------------------\n")
 }

@@ -207,6 +207,21 @@ func BenchmarkSum_t(b *testing.B) {
 	}
 }
 
+func BenchmarkGet_Trit(b *testing.B) {
+
+	var t1 uint32
+	var t0 uint32
+	var p uint8
+
+	p = 0
+	t1 = t1 &^ (1 << p)
+	t0 |= (1 << p)
+
+	for i := 0; i < b.N; i++ {
+		get_trit(t1, t0, p)
+	}
+}
+
 //func BenchmarkCalculate(b *testing.B) {
 //	for i := 0; i < b.N; i++ {
 //	}
