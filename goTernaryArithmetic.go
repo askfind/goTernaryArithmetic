@@ -980,12 +980,16 @@ func following_brusentsov_t(a trit, b trit) trit {
 	return nil
 }
 
-//
 // Троичное сложение двух тритов с переносом
 // (Для измерения производительности операций int)
-//
-func sum_t(a int, b int, p0 int) (int, int) {
+func sum_t(a int8, b int8, p0 int8) (int8, int8) {
 
+	if a > 0 {
+		a = 1
+	}
+	if a < 0 {
+		a = -1
+	}
 	s := a + b + p0
 	switch s {
 	case -3:
@@ -1064,16 +1068,6 @@ func printTryteSymb(input []interface{}) []interface{} {
 	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
 }
 
-// Возведение в степень по модулю 3
-func pow3(x int8) int32 {
-	var i int8
-	var r int32 = 1
-	for i = 0; i < x; i++ {
-		r *= 3
-	}
-	return r
-}
-
 //
 // Операция сдвига тритов
 //
@@ -1114,33 +1108,402 @@ func shift_ts(x tryte, d int8) tryte {
 	return tr
 }
 
-// **************************************
-// *  Определение регистров "Сетунь-1958"
-// *-------------------------------------
+// ***********************************************
+// *  Троичная арифметика компьютера "Сетунь-1958"
+// *----------------------------------------------
 
-// Троичные типы данных
-type tr1 [1]interface{}
-type tr4 [4]interface{}
-type tr5 [5]interface{}
-type tr9 [9]interface{}
-type tr18 [18]interface{}
-type lts interface{}
+/* Константы троичные */
+const (
+	// Длина слова
+	SIZE_WORD_SHORT = 9
+	SIZE_WORD_LONG  = 18
+
+	// Описание ферритовой памяти FRAM
+	NUMBER_ZONE_FRAM    = 3   // количество зон ферритовой памяти
+	SIZE_ZONE_TRIT_FRAM = 54  // количнество коротких 9-тритных слов в зоне
+	SIZE_ALL_TRIT_FRAM  = 162 // всего количество коротких 9-тритных слов
+
+	SIZE_PAGES_FRAM     = 2  // количнество коротких 9-тритных слов в зоне
+	SIZE_PAGE_TRIT_FRAM = 81 // количнество коротких 9-тритных слов в зоне
+
+	// Адреса зон ферритовой памяти FRAM
+	ZONE_M_FRAM_BEG = -120 /* ----0 */
+	ZONE_M_FRAM_END = -41  /* -++++ */
+	ZONE_0_FRAM_BEG = -40  /* 0---0 */
+	ZONE_0_FRAM_END = 40   /* 0++++ */
+	ZONE_P_FRAM_BEG = 42   /* +---0 */
+	ZONE_P_FRAM_END = 121  /* +++++ */
+
+	// Описание магнитного барабана DRUM
+	SIZE_TRIT_DRUM      = 1944 // количество хранения коротких слов из 9-тритов */
+	SIZE_ZONE_TRIT_DRUM = 54   // количество 9-тритных слов в зоне
+	NUMBER_ZONE_DRUM    = 36   // количество зон на магнитном барабане
+)
+
+// Троичный тип данных
+type trs struct {
+	l  uint8  // длина троичного числа в тритах
+	t1 uint32 // двоичное битовое поле троичного числа
+	t0 uint32
+	// if t0[i] == 0 then trit[i] = NIL emdif
+	// if (t0[i] == 1) && (t1[i] == 0)  then trit[i] = FALSE emdif //
+	// if (t0[i] == 1) && (t1[i] == 1)  then trit[i] = TRUE emdif //
+}
 
 // Основные регистры в порядке пульта управления
 var (
-	K tr9 // K(1:9)  код команды (адрес ячейки оперативной памяти)
-	F tr5 // F(1:5)  индекс регистр
-	C tr5 // C(1:5)  программный счетчик
-	W tr1 // W(1:1)  знак троичного числа
+	K trs // K(1:9)  код команды (адрес ячейки оперативной памяти)
+	F trs // F(1:5)  индекс регистр
+	C trs // C(1:5)  программный счетчик
+	W trs // W(1:1)  знак троичного числа
 	//
-	ph1 tr1  // ph1(1:1) 1 разряд переполнения
-	ph2 tr1  // ph2(1:1) 2 разряд переполнения
-	S   tr18 // S(1:18) аккумулятор
-	R   tr18 // R(1:18) регистр множителя
-	MB  tr4  // MB(1:4) троичное число зоны магнитного барабана
+	ph1 trs // ph1(1:1) 1 разряд переполнения
+	ph2 trs // ph2(1:1) 2 разряд переполнения
+	S   trs // S(1:18) аккумулятор
+	R   trs // R(1:18) регистр множителя
+	MB  trs // MB(1:4) троичное число зоны магнитного барабана
 	// Дополнительный
-	MR tr9 // временный регистр для обмена троичным числом
+	MR trs // временный регистр для обмена троичным числом
 )
+
+// Троичное умножение двух тритов с переносом
+func and_trit(a trit, b trit) int8 {
+	if a == false && b == false {
+		return -1
+	} else if a == false && b == nil {
+		return -1
+	} else if a == false && b == true {
+		return -1
+	} else if a == nil && b == false {
+		return -1
+	} else if a == nil && b == nil {
+		return 0
+	} else if a == nil && b == true {
+		return -1
+	} else if a == true && b == false {
+		return -1
+	} else if a == true && b == nil {
+		return 0
+	} else if a == true && b == true {
+		return 1
+	}
+	return 0
+}
+
+func or_trit(a trit, b trit) int8 {
+	if a == false && b == false {
+		return -1
+	} else if a == false && b == nil {
+		return 0
+	} else if a == false && b == true {
+		return 1
+	} else if a == nil && b == false {
+		return 0
+	} else if a == nil && b == nil {
+		return 0
+	} else if a == nil && b == true {
+		return 1
+	} else if a == true && b == false {
+		return 1
+	} else if a == true && b == nil {
+		return 1
+	} else if a == true && b == true {
+		return 1
+	}
+	return 0
+}
+
+func xor_trit(a trit, b trit) int8 {
+	if a == false && b == false {
+		return -1
+	} else if a == false && b == nil {
+		return 0
+	} else if a == false && b == true {
+		return 1
+	} else if a == nil && b == false {
+		return 0
+	} else if a == nil && b == nil {
+		return 0
+	} else if a == nil && b == true {
+		return 0
+	} else if a == true && b == false {
+		return 1
+	} else if a == true && b == nil {
+		return 0
+	} else if a == true && b == true {
+		return -1
+	}
+	return 0
+}
+
+// Очистить троичное число и длину
+func clear_full_trs(tr *trs) {
+	tr.l = 0
+	tr.t0 ^= tr.t0
+}
+
+// Очистить троичное число
+func clear_trs(tr *trs) {
+	tr.t0 ^= tr.t0
+}
+
+// Возведение в степень по модулю 3
+func pow3(x int8) int32 {
+	var i int8
+	var r int32 = 1
+	for i = 0; i < x; i++ {
+		r *= 3
+	}
+	return r
+}
+
+// Преобразование трита в целое число
+func trs2int(tr trs, p uint8) int8 {
+	if p > 31 {
+		p = 31
+	}
+	if (tr.t0 & (1 << p)) == 0 {
+		return 0
+	} else {
+		if (tr.t1 & (1 << p)) == 0 {
+			return -1
+		} else {
+			return 1
+		}
+	}
+}
+
+// Преобразование целое число в трит
+func int2trs(tr trs, p uint8, i int8) trs {
+	if p > 31 {
+		p = 31
+	}
+	if i > 0 {
+		tr.t1 |= (1 << p)
+		tr.t0 |= (1 << p)
+		return tr
+	}
+	if i < 0 {
+		tr.t1 &^= (1 << p)
+		tr.t0 |= (1 << p)
+		return tr
+	}
+	tr.t1 &^= (1 << p)
+	tr.t0 &^= (1 << p)
+	return tr
+}
+
+//  Преобразовать трит в символ '-','0','+'
+func trs2symb(tr trs, p uint8, i int8) string {
+	if p > 31 {
+		p = 31
+	}
+	if tr.t0 == 0 {
+		return "0"
+	} else {
+		if tr.t1 == 0 {
+			return "-"
+		} else {
+			return "+"
+		}
+	}
+}
+
+// Операция знак SGN троичного числа
+func sgn_trs(x trs) int8 {
+	var i int8
+	if x.l > 31 {
+		x.l = 31
+	}
+	for i = int8(x.l) - 1; i >= 0; i -= 1 {
+		if ((x.t0 & (1 << i)) > 0) && ((x.t1 & (1 << i)) == 0) {
+			return -1
+		} else if ((x.t0 & (1 << i)) > 0) && ((x.t1 & (1 << i)) > 0) {
+			return 1
+		}
+	}
+	return 0
+}
+
+// Операция AND trs
+func and_trs(x trs, y trs) trs {
+
+	var r trs
+	var i, j uint8
+	var a, b, s int8
+
+	x.l %= 32
+	y.l %= 32
+
+	if x.l >= y.l {
+		j = x.l
+	} else {
+		j = y.l
+	}
+
+	for i = 0; i < j; i++ {
+		a = trs2int(x, i)
+		b = trs2int(y, i)
+		s = and_trit(int2trit(a), int2trit(b))
+		r = int2trs(r, i, s)
+	}
+
+	return r
+}
+
+// Операция OR trs
+func or_trs(x trs, y trs) trs {
+
+	var r trs
+	var i, j uint8
+	var a, b, s int8
+
+	x.l %= 32
+	y.l %= 32
+
+	if x.l >= y.l {
+		j = x.l
+	} else {
+		j = y.l
+	}
+
+	for i = 0; i < j; i++ {
+		a = trs2int(x, i)
+		b = trs2int(y, i)
+		s = or_trit(int2trit(a), int2trit(b))
+		r = int2trs(r, i, s)
+	}
+
+	return r
+}
+
+// Операция XOR trs
+func xor_trs(x trs, y trs) trs {
+
+	var r trs
+	var i, j uint8
+	var a, b, s int8
+
+	x.l %= 32
+	y.l %= 32
+
+	if x.l >= y.l {
+		j = x.l
+	} else {
+		j = y.l
+	}
+
+	for i = 0; i < j; i++ {
+		a = trs2int(x, i)
+		b = trs2int(y, i)
+		s = xor_trit(int2trit(a), int2trit(b))
+		r = int2trs(r, i, s)
+	}
+
+	return r
+}
+
+/**
+ * Операция сдвига тритов
+ * Параметр:
+ * if(d > 0) then "Вправо"
+ * if(d == 0) then "Нет сдвига"
+ * if(d < 0) then "Влево"
+ * Возврат: Троичное число
+ */
+func shift_trs(tr trs, d int8) trs {
+	tr.l %= 32
+	if d > 0 {
+		tr.t1 >>= d
+		tr.t0 >>= d
+	} else if d < 0 {
+		tr.t1 <<= -d
+		tr.t0 <<= -d
+	}
+	return tr
+}
+
+// Троичное сложение троичных чисел
+func add_trs(x trs, y trs) trs {
+	var i, j uint8
+	var a, b, s, p0, p1 int8
+	var r trs
+
+	if x.l > 31 {
+		x.l = 31
+	}
+	if y.l > 31 {
+		y.l = 31
+	}
+
+	if x.l >= y.l {
+		j = x.l
+	} else {
+		j = y.l
+	}
+
+	r.l = j
+	r.t0 = 0
+
+	p0 = 0
+	p1 = 0
+
+	for i = 0; i < j; i++ {
+
+		a = trs2int(x, i)
+		b = trs2int(y, i)
+		s, p1 = sum_t(a, b, p0)
+		r = int2trs(r, i, s)
+		p0 = p1
+
+		x.t1 >>= 1
+		x.t0 >>= 1
+		y.t1 >>= 1
+		y.t0 >>= 1
+	}
+	return r
+}
+
+// Троичное сложение троичных чисел
+func sub_trs(x trs, y trs) trs {
+	var i, j uint8
+	var a, b, s, p0, p1 int8
+	var r trs
+
+	if x.l > 31 {
+		x.l = 31
+	}
+	if y.l > 31 {
+		y.l = 31
+	}
+
+	if x.l >= y.l {
+		j = x.l
+	} else {
+		j = y.l
+	}
+
+	r.l = j
+	r.t0 = 0
+
+	p0 = 0
+	p1 = 0
+
+	for i = 0; i < j; i++ {
+
+		a = trs2int(x, i)
+		b = 0 - trs2int(y, i)
+		s, p1 = sum_t(a, b, p0)
+		r = int2trs(r, i, s)
+		p0 = p1
+
+		x.t1 >>= 1
+		x.t0 >>= 1
+		y.t1 >>= 1
+		y.t0 >>= 1
+	}
+	return r
+}
 
 // Сложение  в  S (S)+(A*)=>(S)
 //func add_tr(x lts ,y lts ) lts  {
@@ -1174,6 +1537,38 @@ var (
 
 // Посылка в R (A*)=>(R)
 // Нормализация	Норм.(S)=>(A*); (N)=>(S)
+
+// Аппаратный сброс.
+// Очистить память и регистры
+// виртуальной машины "Сетунь-1958"
+func reset_setun_1958() {
+	//
+	// clean_fram();	/* Очистить  FRAM */
+	// clean_drum();	/* Очистить  DRUM */
+	//
+	clear_full_trs(&K) /* K(1:9) */
+	K.l = 9
+	clear_full_trs(&F) /* F(1:5) */
+	F.l = 5
+	clear_full_trs(&C) /* K(1:5) */
+	C.l = 5
+	clear_full_trs(&W) /* W(1:1) */
+	W.l = 1
+	//
+	clear_full_trs(&ph1) /* ph1(1:1) */
+	ph1.l = 1
+	clear_full_trs(&ph2) /* ph2(1:1) */
+	ph2.l = 1
+	clear_full_trs(&S) /* S(1:18) */
+	S.l = 18
+	clear_full_trs(&R) /* R(1:18) */
+	R.l = 18
+	clear_full_trs(&MB) /* MB(1:4) */
+	MB.l = 4
+	//
+	clear_full_trs(&MR) /* Временный регистр данных MR(1:9) */
+	MR.l = 9
+}
 
 // ---------------------------------------------------
 // Main
@@ -1257,6 +1652,34 @@ func main() {
 	t0 <<= 2
 	trt = get_trit(t1, t0, 2)
 	fmt.Printf(" shift trt=% 2d\n", trt)
+
+	fmt.Printf("--- Operation Setun-1958 ---\n")
+
+	reset_setun_1958()
+	K = int2trs(K, 0, -1)
+	fmt.Println(K)
+	fmt.Println(sgn_trs(K))
+	K = int2trs(K, 0, 0)
+	fmt.Println(K)
+
+	K = int2trs(K, 0, 1)
+	fmt.Printf(" K=%v\n", K)
+	K = add_trs(K, K)
+	K = sub_trs(K, K)
+	fmt.Printf(" K=K+K=%v\n", K)
+
+	K = int2trs(K, 0, 1)
+	K = shift_trs(K, -1)
+	K = shift_trs(K, -3)
+	fmt.Println(K)
+	K = sub_trs(K, K)
+	fmt.Println(K)
+	K = shift_trs(K, 2)
+	fmt.Println(K)
+	K = shift_trs(K, 100)
+	fmt.Println(K)
+
+	fmt.Println(S)
 
 	fmt.Printf("--------------------------------\n")
 }

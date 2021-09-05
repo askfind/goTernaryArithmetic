@@ -9,7 +9,7 @@ var tt trit
 var tr [6]trit
 var s, carry trit
 
-func TestSetTrit(t *testing.T) {
+func Test_set_trit(t *testing.T) {
 
 	fmt.Println("Test TRIT:")
 	fmt.Printf("tt = NIL \n")
@@ -40,7 +40,7 @@ func TestSetTrit(t *testing.T) {
 	//}
 }
 
-func TestSetTryte(t *testing.T) {
+func Test_set_tryte(t *testing.T) {
 
 	fmt.Println("Test TRYTE:")
 	fmt.Printf("tryte = %v \n", tr)
@@ -52,7 +52,7 @@ func TestSetTryte(t *testing.T) {
 	t.Log("right")
 }
 
-func TestTrit2Int(t *testing.T) {
+func Test_trit2int(t *testing.T) {
 
 	fmt.Println("Test TRIT to INT:")
 	fmt.Printf("trit2int(true) = %v \n", trit2int(true))
@@ -63,7 +63,7 @@ func TestTrit2Int(t *testing.T) {
 	t.Log("right")
 }
 
-func TestInt2Trit(t *testing.T) {
+func Test_int2trit(t *testing.T) {
 
 	fmt.Println("Test INT to TRIT:")
 	fmt.Printf("int2trit(1) = %v \n", int2trit(1))
@@ -74,7 +74,7 @@ func TestInt2Trit(t *testing.T) {
 	t.Log("right")
 }
 
-func TestAddHalfTrits(t *testing.T) {
+func Test_add_half_t(t *testing.T) {
 
 	fmt.Println("Test ADD HALF TRITS  add_half_t(...):")
 	s, carry = add_half_t(false, false)
@@ -100,7 +100,7 @@ func TestAddHalfTrits(t *testing.T) {
 	t.Log("right")
 }
 
-func TestAddFullTrits(t *testing.T) {
+func Test_add_full_t(t *testing.T) {
 
 	fmt.Println("Test ADD FULL TRITS  add_full_t(...):")
 	s, carry = add_full_t(false, false, false)
@@ -122,7 +122,7 @@ func TestAddFullTrits(t *testing.T) {
 	t.Log("right")
 }
 
-func TestMulTrits(t *testing.T) {
+func Test_mul_t(t *testing.T) {
 	fmt.Println("Test MUL TRITS  mul_t(...):")
 	s = mul_t(false, false)
 	fmt.Printf("mul_t( -1 * -1) => %v \n", s)
@@ -147,13 +147,13 @@ func TestMulTrits(t *testing.T) {
 	t.Log("right")
 }
 
-func TestPow3(t *testing.T) {
+func Test_pow3(t *testing.T) {
 	var i int8
 	for i = 0; i < 18; i++ {
 		fmt.Printf("pow3(%d)=%v\n", i, pow3(i))
 	}
 }
-func TestShift(t *testing.T) {
+func Test_shift_ts(t *testing.T) {
 	// Троичные переменные
 	var x tryte
 	var z tryte
@@ -176,38 +176,38 @@ func TestShift(t *testing.T) {
 	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteInt(rx[:]))
 }
 
-func BenchmarkPow3(b *testing.B) {
+func Benchmark_pow3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		pow3(18)
 	}
 }
 
-func BenchmarkShift_ts(b *testing.B) {
+func Benchmark_shift_ts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var x tryte
 		shift_ts(x, 5)
 	}
 }
 
-func BenchmarkAdd_full_t(b *testing.B) {
+func Benchmark_add_full_t(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s, carry = add_full_t(false, false, false)
 	}
 }
 
-func BenchmarkMul_t(b *testing.B) {
+func Benchmark_mul_t(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s = mul_t(false, true)
 	}
 }
 
-func BenchmarkSum_t(b *testing.B) {
+func Benchmark_sum_t(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		sum_t(1, 1, 1)
 	}
 }
 
-func BenchmarkGet_Trit(b *testing.B) {
+func Benchmark_get_trit(b *testing.B) {
 
 	var t1 uint32
 	var t0 uint32
@@ -219,6 +219,32 @@ func BenchmarkGet_Trit(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		get_trit(t1, t0, p)
+	}
+}
+
+func Benchmark_sgn_trs(b *testing.B) {
+	var x trs
+	x.l = 18
+	for i := 0; i < b.N; i++ {
+		sgn_trs(x)
+	}
+}
+
+func Benchmark_shift_trs(b *testing.B) {
+	var x trs
+	x.l = 31
+	for i := 0; i < b.N; i++ {
+		x = shift_trs(x, -31)
+	}
+}
+
+func Benchmark_add_trs(b *testing.B) {
+	var x trs
+	var y trs
+	x.l = 31
+	y.l = 31
+	for i := 0; i < b.N; i++ {
+		add_trs(x, y)
 	}
 }
 
