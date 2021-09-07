@@ -8,59 +8,166 @@ import (
 // +--------------------------+-------+-------+-------+
 // | Числа                    |  -1   |   0   |   1   |
 // +--------------------------+-------+-------+-------+
-// | Символы (вар.1)          |   -   |	  0   |	  +   |
-// +--------------------------+-------+-------+-------+
-// | Символы (вар.2)          |   v   |	  0   |	  ^   |
-// +--------------------------+-------+-------+-------+
-// | Символы (вар.3)          |   N   |	  O   |	  P   |
-// +--------------------------+-------+-------+-------+
-// | Символы (вар.4)          |   N   |	  Z   |	  P   |
-// +--------------------------+-------+-------+-------+
-// | Символы (вар.5)          |   0   |	  i   |	  1   |
-// +--------------------------+-------+-------+-------+
 // | Логика                   | false |  nil  | true  |
 // +--------------------------+-------+-------+-------+
+// | Логика                   |   f   |   n   |   t   |
+// +--------------------------+-------+-------+-------+
+// | Символы                  |   -   |	  0   |	  +   |
+// +--------------------------+-------+-------+-------+
+// | Символы                  |   N   |	  Z   |	  P   |
+// +--------------------------+-------+-------+-------+
+// | Символы                  |   N   |	  O   |	  P   |
+// +--------------------------+-------+-------+-------+
+// | Символы                  |   0   |	  i   |	  1   |
+// +--------------------------+-------+-------+-------+
+// | Символы                  |   v   |	  0   |	  ^   |
+// +--------------------------+-------+-------+-------+
 
-// В троичной логике только 729 коммутативных двухоперандных
-// функций из 19,683, т.е. таких что F(A,B) = F(B,A)
+// В троичной логике:
+//   - 729 коммутативных двухоперандных
+//   - 19,683 функций вида F(A,B) = F(B,A)
 
 // ----------------------------------------------------
 // TRIT Arithmetic
 // ----------------------------------------------------
 
 // Объявление троичных типов
-type trit interface{}
+type trits struct {
+	t uint8 // FALSE,TRUE
+	n uint8 // NIL
+}
 
-// Преобразование трита в целое число
-func trit2int(t trit) int8 {
-	if t == true {
-		return 1
+// Метод установить трит в True
+func (t trits) SetTrue() (r trits) {
+	r.t = 1
+	r.n = 1
+	return r
+}
+
+// Метод установить трит в Nil
+func (t trits) SetNil() (r trits) {
+	r.t = 0
+	r.n = 0
+	return r
+}
+
+// Метод установить трит в False
+func (t trits) SetFalse() (r trits) {
+	r.t = 0
+	r.n = 1
+	return r
+}
+
+// Метод трит в False ?
+func (t trits) IsFalse() bool {
+	if t.n != 0 {
+		if t.t == 0 {
+			return true
+		}
 	}
-	if t == false {
+	return false
+}
+
+// Метод трит в Nil ?
+func (t trits) IsNil() bool {
+	if t.n == 0 {
+		return true
+	}
+	return false
+}
+
+// Метод трит в Nil ?
+func (t trits) IsTrue() bool {
+	if t.n != 0 {
+		if t.t != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// Метод очистить трит
+func (t trits) Clear() (r trits) {
+	r.t = 0
+	r.n = 0
+	return r
+}
+
+// Метод вернуть символ трита "-1","0","1"
+func (t trits) SymbNumb() string {
+	if t.n == 0 {
+		return "0"
+	} else if t.t != 0 {
+		return "1"
+	} else {
+		return "-1"
+	}
+}
+
+// Метод вернуть символ трита "%false","%nil","%true"
+func (t trits) SymbLogic() string {
+	if t.n == 0 {
+		return "%nil"
+	} else if t.t != 0 {
+		return "%true"
+	} else {
+		return "%false"
+	}
+}
+
+// Метод вернуть символ трита "-","0","+"
+func (t trits) SymbTrit() string {
+	if t.n == 0 {
+		return "0"
+	} else if t.t != 0 {
+		return "+"
+	} else {
+		return "-"
+	}
+}
+
+// Метод вернуть символ трита "M","N","P"
+func (t trits) SymbChar() string {
+	if t.n == 0 {
+		return "N"
+	} else if t.t != 0 {
+		return "P"
+	} else {
+		return "M"
+	}
+}
+
+// Метод вернуть символ трита в int8
+func (t trits) ToInt() int8 {
+	if t.n == 0 {
+		return 0
+	} else if t.t != 0 {
+		return 1
+	} else {
 		return -1
 	}
-	return 0
 }
 
 // Преобразование целое число в трит
-func int2trit(i int8) trit {
+func int2trit(i int8) (r trits) {
 	if i > 0 {
-		return true
+		return r.SetTrue()
 	}
 	if i < 0 {
-		return false
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
-//  Преобразовать трит в символ '-','0','+'
-func trit2symb(t trit) string {
-	if t == false {
-		return "-"
-	} else if t == nil {
-		return "0"
+// --------------------------
+// Функции операций с тритами
+
+// Сравнить триты
+func cmp_trits(a trits, b trits) bool {
+	if a == b {
+		return true
 	} else {
-		return "+"
+		return false
 	}
 }
 
@@ -76,28 +183,44 @@ func trit2symb(t trit) string {
 // .------------------------.
 
 // Полусумматор двух тритов с переносом
-func add_half_t(a trit, b trit) (c trit, carry trit) {
-
-	if a == false && b == false {
-		return true, false
-	} else if a == false && b == nil {
-		return false, nil
-	} else if a == false && b == true {
-		return nil, nil
-	} else if a == nil && b == false {
-		return false, nil
-	} else if a == nil && b == nil {
-		return nil, nil
-	} else if a == nil && b == true {
-		return true, nil
-	} else if a == true && b == false {
-		return nil, nil
-	} else if a == true && b == nil {
-		return true, nil
-	} else if a == true && b == true {
-		return false, true
+func add_half_slowly_t(a trits, b trits) (c trits, carry trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return c.SetTrue(), carry.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return c.SetFalse(), carry.SetTrue()
+	} else if a.IsFalse() && b.IsTrue() {
+		return c.SetNil(), carry.SetNil()
+	} else if a.IsNil() && b.IsFalse() {
+		return c.SetFalse(), carry.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return c.SetNil(), carry.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return c.SetTrue(), carry.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return c.SetNil(), carry.SetNil()
+	} else if a.IsTrue() && b.IsNil() {
+		return c.SetTrue(), carry.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return c.SetFalse(), carry.SetTrue()
 	}
-	return nil, nil
+	return c.SetNil(), carry.SetNil()
+}
+
+// Полусумматор двух тритов с переносом
+func add_half_t(a trits, b trits) (c trits, carry trits) {
+	switch a.ToInt() + b.ToInt() {
+	case -2:
+		return c.SetTrue(), carry.SetFalse()
+	case -1:
+		return c.SetFalse(), carry.SetNil()
+	case 0:
+		return c.SetNil(), carry.SetNil()
+	case 1:
+		return c.SetTrue(), carry.SetNil()
+	case 2:
+		return c.SetFalse(), carry.SetTrue()
+	}
+	return c.SetNil(), carry.SetNil()
 }
 
 // Таб.3 Таблица полного сумматора тритов
@@ -109,11 +232,33 @@ func add_half_t(a trit, b trit) (c trit, carry trit) {
 // | Перенос в n+1    -1  -1   0   0   1   1 |
 // .-----------------------------------------.
 // Полный сумматор двух тритов с переносом
-func add_full_t(a trit, b trit, incarry trit) (c trit, outcarry trit) {
-	s, sc := add_half_t(a, b)
-	d, dc := add_half_t(s, incarry)
-	ss, _ := add_half_t(sc, dc)
+func add_full_slowly_t(a trits, b trits, incarry trits) (c trits, outcarry trits) {
+	s, sc := add_half_slowly_t(a, b)
+	d, dc := add_half_slowly_t(s, incarry)
+	ss, _ := add_half_slowly_t(sc, dc)
 	return d, ss
+}
+
+// Полный сумматор двух тритов с переносом
+func add_full_t(a trits, b trits, incarry trits) (c trits, outcarry trits) {
+
+	switch a.ToInt() + b.ToInt() + incarry.ToInt() {
+	case -3:
+		return c.SetNil(), outcarry.SetFalse()
+	case -2:
+		return c.SetTrue(), outcarry.SetFalse()
+	case -1:
+		return c.SetFalse(), outcarry.SetNil()
+	case 0:
+		return c.SetNil(), outcarry.SetNil()
+	case 1:
+		return c.SetTrue(), outcarry.SetNil()
+	case 2:
+		return c.SetFalse(), outcarry.SetTrue()
+	case 3:
+		return c.SetNil(), outcarry.SetTrue()
+	}
+	return c.SetNil(), outcarry.SetNil()
 }
 
 // Таб.4 Троичное умножение
@@ -128,18 +273,39 @@ func add_full_t(a trit, b trit, incarry trit) (c trit, outcarry trit) {
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
 // Троичное умножение двух тритов с переносом
-func mul_t(a trit, b trit) trit {
-
-	if a == false && b == false {
-		return true
-	} else if a == false && b == true {
-		return false
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == true {
-		return true
+func mul_slowly_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
+}
+
+// .-----------------------.
+// |     | -1  |  0  |  1  |
+// |-----------------------|
+// | -1  |  +  |  0  |  -  |
+// |-----------------------|
+// |  0  |  0  |  0  |  0  |
+// |-----------------------|
+// |  1  |  -  |  0  |  +  |
+// .-----------------------.
+// Троичное умножение двух тритов с переносом
+func mul_t(a trits, b trits) (r trits) {
+	switch a.ToInt() * b.ToInt() {
+	case 1:
+		return r.SetTrue()
+	case -1:
+		return r.SetFalse()
+	case 0:
+		return r.SetNil()
+	}
+	return r.SetNil()
 }
 
 // Таб.5 Троичное отрицание
@@ -151,13 +317,13 @@ func mul_t(a trit, b trit) trit {
 // |-----------|
 // |  +  |  -  |
 // .-----------.
-func not_t(a trit) trit {
-	if a == false {
-		return true
-	} else if a == true {
-		return false
+func not_t(a trits) (r trits) {
+	if a.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.6 Троичное умножение
@@ -173,27 +339,27 @@ func not_t(a trit) trit {
 // .-----------------------.
 //  X AND Y = MIN(X,Y)
 // Троичное умножение двух тритов с переносом
-func and_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return false
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func and_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.7 Троичное или
@@ -208,27 +374,27 @@ func and_t(a trit, b trit) trit {
 // |  1  |  +  |  +  |  +  |
 // .-----------------------.
 //   X OR Y = MAX(X,Y)
-func or_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return true
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return true
+func or_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.8 Троичное исключающее или
@@ -242,27 +408,27 @@ func or_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  +  |  0  |  -  |
 // .-----------------------.
-func xor_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return false
+func xor_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.9 Троичное
@@ -277,27 +443,27 @@ func xor_t(a trit, b trit) trit {
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
 // EQV(X,Y) = NOT (XOR(X,Y))
-func eqv_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func eqv_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.10 Троичное
@@ -312,27 +478,27 @@ func eqv_t(a trit, b trit) trit {
 // |  1  |  +  |  0  |  -  |
 // .-----------------------.
 // NAND(X,Y) = NOT (AND(X,Y))
-func nand_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return true
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return false
+func nand_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.11 Троичное
@@ -347,27 +513,27 @@ func nand_t(a trit, b trit) trit {
 // |  1  |  -  |  -  |  -  |
 // .-----------------------.
 // NOR(X,Y) = NOT((OR(X,Y))
-func nor_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return false
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return false
-	} else if a == true && b == true {
-		return false
+func nor_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.12 Троичное
@@ -381,27 +547,27 @@ func nor_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
-func imp_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return true
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func imp_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.13 Троичное исключающее максимального
@@ -419,27 +585,27 @@ func imp_t(a trit, b trit) trit {
 //	F = MAX(A,B), если A != B
 //	    0	    , если A == B
 //	(имейте в виду - это не XOR).
-func xmax_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return false
-	} else if a == nil && b == true {
-		return true
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return false
+func xmax_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.14 Троичное Инверсно Исключающий минимального
@@ -453,27 +619,27 @@ func xmax_t(a trit, b trit) trit {
 // |-----------------------|
 // |  1  |  -  |  0  |  +  |
 // .-----------------------.
-func ixmax_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func ixmax_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.15 Троичное Инверсно Исключающий минимального
@@ -492,27 +658,27 @@ func ixmax_t(a trit, b trit) trit {
 //	Если ii, то возращает 1
 //	Если iX или Xi, то возращает i
 //	Иначе 0
-func mean_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return false
+func mean_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.16 Троичное Инверсно Исключающий минимального
@@ -532,27 +698,27 @@ func mean_t(a trit, b trit) trit {
 //	Возращает 0, если A < B
 //		  i, если A = B
 //		  1, если A > B
-func magnitude_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return nil
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return false
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return nil
+func magnitude_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetNil()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Таб.17 Троичное дополнительный код
@@ -564,13 +730,13 @@ func magnitude_t(a trit, b trit) trit {
 // |-----------|
 // |  +  |  0  |
 // .-----------.
-func neg_t(a trit) trit {
-	if a == false {
-		return false
-	} else if a == nil {
-		return true
+func neg_t(a trits) (r trits) {
+	if a.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Расмотрим еще некоторые функции
@@ -584,27 +750,27 @@ func neg_t(a trit) trit {
 //	0 | -  0  +
 //	+ | 0  +  -
 //	--+----------
-func add_mod_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return nil
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return true
-	} else if a == true && b == false {
-		return nil
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return false
+func add_mod_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Перенос в сложении по модулю
@@ -615,27 +781,27 @@ func add_mod_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | 0  0  +
 //	--+----------
-func carry_add_mod_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return nil
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return nil
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func carry_add_mod_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Сложение с насышением
@@ -646,27 +812,27 @@ func carry_add_mod_t(a trit, b trit) trit {
 //	0 | -  0  +
 //	+ | 0  +  +
 //	--+----------
-func add_satiation_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return nil
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return true
-	} else if a == true && b == false {
-		return nil
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return true
+func add_satiation_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //
@@ -678,27 +844,27 @@ func add_satiation_t(a trit, b trit) trit {
 //	0 | +  +  -
 //	+ | -  -  -
 //	--+----------
-func webb_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return nil
-	} else if a == false && b == nil {
-		return true
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return false
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return false
-	} else if a == true && b == true {
-		return false
+func webb_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetFalse()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //   Тождество (строгоe)
@@ -709,27 +875,27 @@ func webb_t(a trit, b trit) trit {
 //	0 | -  +  -
 //	+ | -  -  +
 //	--+----------
-func identity_strict_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return false
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return false
-	} else if a == true && b == true {
-		return true
+func identity_strict_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //   Тождество (weak)
@@ -740,27 +906,27 @@ func identity_strict_t(a trit, b trit) trit {
 //	0 | 0  0  0      в общем как умножение
 //	+ | -  0  +
 //	--+----------
-func weak_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func weak_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Коньюнкция Лукашевича (сильная)
@@ -771,27 +937,27 @@ func weak_t(a trit, b trit) trit {
 //	0 | -  -  0
 //	+ | -  0  +
 //	--+----------
-func conjunction_lukashevich_strong_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return false
-	} else if a == nil && b == nil {
-		return false
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func conjunction_lukashevich_strong_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Импликация Лукашевича
@@ -802,27 +968,27 @@ func conjunction_lukashevich_strong_t(a trit, b trit) trit {
 //	0 | +  +  0
 //	+ | +  +  +
 //	--+----------
-func lukashevich_implication_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return true
+func lukashevich_implication_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Коньюнкция Клини
@@ -833,27 +999,27 @@ func lukashevich_implication_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | -  0  +
 //	--+----------
-func klini_conjunction_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return false
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func klini_conjunction_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Импликация Клини
@@ -864,27 +1030,27 @@ func klini_conjunction_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | -  0  +
 //	--+----------
-func implication_clinic_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return true
-	} else if a == false && b == true {
-		return true
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return false
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func implication_clinic_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetFalse()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Интуиционистская импликация Геделя
@@ -895,27 +1061,27 @@ func implication_clinic_t(a trit, b trit) trit {
 //	0 | +  +  0
 //	+ | +  +  +
 //	--+----------
-func goedel_intuitionistic_implication_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return false
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return true
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return true
+func goedel_intuitionistic_implication_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetFalse()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Материальная импликация
@@ -926,27 +1092,27 @@ func goedel_intuitionistic_implication_t(a trit, b trit) trit {
 //	0 | +  0  0
 //	+ | +  +  +
 //	--+----------
-func material_implication_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return true
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return true
-	} else if a == true && b == nil {
-		return true
-	} else if a == true && b == true {
-		return true
+func material_implication_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetTrue()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 //  Функция следования Брусенцова
@@ -957,27 +1123,27 @@ func material_implication_t(a trit, b trit) trit {
 //	0 | 0  0  0
 //	+ | 0  0  +
 //	--+----------
-func following_brusentsov_t(a trit, b trit) trit {
-	if a == false && b == false {
-		return true
-	} else if a == false && b == nil {
-		return nil
-	} else if a == false && b == true {
-		return false
-	} else if a == nil && b == false {
-		return nil
-	} else if a == nil && b == nil {
-		return nil
-	} else if a == nil && b == true {
-		return nil
-	} else if a == true && b == false {
-		return nil
-	} else if a == true && b == nil {
-		return nil
-	} else if a == true && b == true {
-		return true
+func following_brusentsov_t(a trits, b trits) (r trits) {
+	if a.IsFalse() && b.IsFalse() {
+		return r.SetTrue()
+	} else if a.IsFalse() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsFalse() && b.IsTrue() {
+		return r.SetFalse()
+	} else if a.IsNil() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsNil() && b.IsTrue() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsFalse() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsNil() {
+		return r.SetNil()
+	} else if a.IsTrue() && b.IsTrue() {
+		return r.SetTrue()
 	}
-	return nil
+	return r.SetNil()
 }
 
 // Троичное сложение двух тритов с переносом
@@ -1038,117 +1204,239 @@ func get_trit(t1 uint32, t0 uint32, p uint8) int {
 }
 
 // ----------------------------------------------------
-// TRYTE
+// 32-TRITS
 // ----------------------------------------------------
+const TRITSMAX = 32
 
-// t5t4t3t2t1t0
-type tryte [6]interface{}
-
-// Изменить порядок тритов в трайте
-func reverseTryte(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
-	}
-	return append(reverseTryte(input[1:]), input[0])
+// Троичный тип данных
+type trs struct {
+	l  uint8  // длина троичного числа в тритах
+	t1 uint32 // двоичное битовое поле троичного числа {FALSE,TRUE}
+	t0 uint32 // двоичное битовое поле троичного числа {NIL}
+	// if t0[i] == 0 then trit[i] = NIL emdif
+	// if (t0[i] == 1) && (t1[i] == 0)  then trit[i] = FALSE emdif //
+	// if (t0[i] == 1) && (t1[i] == 1)  then trit[i] = TRUE emdif //
 }
 
-// Изменить порядок тритов в трайте
-func printTryteInt(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
+// Метод получить трит в позиции троичного числа
+func (ts trs) GetTrit(p uint8) int8 {
+	if p > TRITSMAX {
+		return 0
 	}
-	return append(printTryteInt(input[1:]), trit2int(input[0]))
+
+	if (ts.t0 & (1 << p)) == 0 {
+		return 0
+	} else if (ts.t1 & (1 << p)) != 0 {
+		return 1
+	} else {
+		return 0
+	}
+	return 0
 }
 
-// Изменить порядок тритов в трайте
-func printTryteSymb(input []interface{}) []interface{} {
-	if len(input) == 0 {
-		return input
+// Метод получить трит в позиции троичного числа
+func (ts trs) SetTrit(p uint8, t int8) (r trs) {
+	if p > TRITSMAX {
+		return ts
 	}
-	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
+
+	if t > 0 {
+		ts.t1 |= (1 << p)
+		ts.t0 |= (1 << p)
+	}
+	if t < 0 {
+		ts.t1 &^= (1 << p)
+		ts.t0 |= (1 << p)
+	}
+	ts.t1 &^= (1 << p)
+	ts.t0 &^= (1 << p)
+
+	return ts
 }
+
+// Метод установить трит в True
+func (ts trs) SetTrue(p uint8) trs {
+	if p > TRITSMAX {
+		p = TRITSMAX
+	}
+	ts.t1 |= (1 << p)
+	ts.t0 |= (1 << p)
+	return ts
+}
+
+// Метод установить трит в Nil
+func (ts trs) SetNil(p uint8) trs {
+	if p > TRITSMAX {
+		p = TRITSMAX
+	}
+	ts.t1 &^= (1 << p)
+	ts.t0 &^= (1 << p)
+	return ts
+}
+
+// Метод установить трит в False
+func (ts trs) SetFalse(p uint8) trs {
+	if p > TRITSMAX {
+		p = TRITSMAX
+	}
+	ts.t1 &^= (1 << p)
+	ts.t0 |= (1 << p)
+	return ts
+}
+
+// Метод трит в False ?
+func (ts trs) IsFalse(p uint8) bool {
+
+	if (ts.t0 & (1 << p)) == 0 {
+		return false
+	}
+	if (ts.t1 & (1 << p)) == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+// Метод трит в Nil ?
+func (ts trs) IsNil(p uint8) bool {
+	if (ts.t0 & (1 << p)) == 0 {
+		return true
+	}
+	if (ts.t1 & (1 << p)) == 0 {
+		return false
+	} else {
+		return false
+	}
+}
+
+// Метод трит в Nil ?
+func (ts trs) IsTrue(p uint8) bool {
+	if (ts.t0 & (1 << p)) == 0 {
+		return false
+	}
+	if (ts.t1 & (1 << p)) == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
+// Метод очистить трит
+func (ts trs) Clear(p uint8) trs {
+	ts.t1 &^= (1 << p)
+	ts.t0 &^= (1 << p)
+	return ts
+}
+
+// Метод вернуть символ трита "-1","0","1"
+//func (t trits) SymbNumb(p int8) string {
+//	if t.n == 0 {
+//		return "0"
+//	} else if t.t != 0 {
+//		return "1"
+//	} else {
+//		return "-1"
+//	}
+//}
+
+// Метод вернуть символ трита "%false","%nil","%true"
+//func (t trits) SymbLogic(p int8) string {
+//	if t.n == 0 {
+//		return "%nil"
+//	} else if t.t != 0 {
+//		return "%true"
+//	} else {
+//		return "%false"
+//	}
+//}
+
+// Метод вернуть символ трита "-","0","+"
+//func (t trits) SymbTrit(p int8) string {
+//	if t.n == 0 {
+//		return "0"
+//	} else if t.t != 0 {
+//		return "+"
+//	} else {
+//		return "-"
+//	}
+//}
+
+// Метод вернуть символ трита "M","N","P"
+//func (t trits) SymbChar(p int8) string {
+//	if t.n == 0 {
+//		return "N"
+//	} else if t.t != 0 {
+//		return "P"
+//	} else {
+//		return "M"
+//	}
+//}
+
+// Метод вернуть символ трита в int8
+//func (t trits) ToInt(p int8) int8 {
+//	if t.n == 0 {
+//		return 0
+//	} else if t.t != 0 {
+//		return 1
+//	} else {
+//		return -1
+//	}
+//}
 
 //
 // Операция сдвига тритов
-//
+// Версия 1
 // Параметр:
 // if(d > 0) then "Вправо"
 // if(d == 0) then "Нет сдвига"
 // if(d < 0) then "Влево"
 // Возврат: Троичное число
 //
-func shift_ts(x tryte, d int8) tryte {
-	var tr tryte = x
-	var n int8
-	var s int8
-
-	if d == 0 {
-		return tr
-	} else if d < 0 {
-		n = -d
-	} else {
-		n = d
-	}
+func shift_ts(tr trs, d int8) trs {
 	if d > 0 {
-		for s = 0; s < n; s++ {
-			for i := 0; i < len(tr)-1; i++ {
-				tr[i] = tr[i+1]
-			}
-			id := len(tr) - 1
-			tr[id] = nil
-		}
+		tr.t1 >>= d
+		tr.t0 >>= d
 	} else if d < 0 {
-		for s = 0; s < n; s++ {
-			for i := len(tr) - 1; i > 0; i-- {
-				tr[i] = tr[i-1]
-			}
-			tr[0] = nil
-		}
+		tr.t1 <<= -d
+		tr.t0 <<= -d
 	}
 	return tr
 }
 
-// ***********************************************
-// *  Троичная арифметика компьютера "Сетунь-1958"
-// *----------------------------------------------
+// Изменить порядок тритов в трайте
+//func reverseTryte(input []interface{}) []interface{} {
+//	if len(input) == 0 {
+//		return input
+//	}
+//	return append(reverseTryte(input[1:]), input[0])
+//}
 
-/* Константы троичные */
-const (
-	// Длина слова
-	SIZE_WORD_SHORT = 9
-	SIZE_WORD_LONG  = 18
+// Изменить порядок тритов в трайте
+//func printTryteInt(input []interface{}) []interface{} {
+//	if len(input) == 0 {
+//		return input
+//	}
+//	return append(printTryteInt(input[1:]), trit2int(input[0]))
+//}
 
-	// Описание ферритовой памяти FRAM
-	NUMBER_ZONE_FRAM    = 3   // количество зон ферритовой памяти
-	SIZE_ZONE_TRIT_FRAM = 54  // количнество коротких 9-тритных слов в зоне
-	SIZE_ALL_TRIT_FRAM  = 162 // всего количество коротких 9-тритных слов
+// Изменить порядок тритов в трайте
+//func printTryteSymb(input []interface{}) []interface{} {
+//	if len(input) == 0 {
+//		return input
+//	}
+//	return append(printTryteSymb(input[1:]), trit2symb(input[0]))
+//}
 
-	SIZE_PAGES_FRAM     = 2  // количнество коротких 9-тритных слов в зоне
-	SIZE_PAGE_TRIT_FRAM = 81 // количнество коротких 9-тритных слов в зоне
-
-	// Адреса зон ферритовой памяти FRAM
-	ZONE_M_FRAM_BEG = -120 /* ----0 */
-	ZONE_M_FRAM_END = -41  /* -++++ */
-	ZONE_0_FRAM_BEG = -40  /* 0---0 */
-	ZONE_0_FRAM_END = 40   /* 0++++ */
-	ZONE_P_FRAM_BEG = 42   /* +---0 */
-	ZONE_P_FRAM_END = 121  /* +++++ */
-
-	// Описание магнитного барабана DRUM
-	SIZE_TRIT_DRUM      = 1944 // количество хранения коротких слов из 9-тритов */
-	SIZE_ZONE_TRIT_DRUM = 54   // количество 9-тритных слов в зоне
-	NUMBER_ZONE_DRUM    = 36   // количество зон на магнитном барабане
-)
-
-// Троичный тип данных
-type trs struct {
-	l  uint8  // длина троичного числа в тритах
-	t1 uint32 // двоичное битовое поле троичного числа
-	t0 uint32
-	// if t0[i] == 0 then trit[i] = NIL emdif
-	// if (t0[i] == 1) && (t1[i] == 0)  then trit[i] = FALSE emdif //
-	// if (t0[i] == 1) && (t1[i] == 1)  then trit[i] = TRUE emdif //
-}
+// ***************************************************************************
+// Виртуальный процессор: TRISC-32
+// Автор: @oberon87
+//
+// Links:
+// 1) https://habr.com/ru/users/oberon87/
+// 2) https://people.inf.ethz.ch/wirth/FPGA-relatedWork/RISC-Arch.pdf
+// 3) https://people.inf.ethz.ch/wirth/ProjectOberon/PO.Computer.pdf
+// 4) https://habr.com/ru/post/258727/
+// ---------------------------------------------------------------------------
 
 // Основные регистры в порядке пульта управления
 var (
@@ -1167,70 +1455,70 @@ var (
 )
 
 // Троичное умножение двух тритов с переносом
-func and_trit(a trit, b trit) int8 {
-	if a == false && b == false {
+func and_trit(a trits, b trits) int8 {
+	if a.IsFalse() && b.IsFalse() {
 		return -1
-	} else if a == false && b == nil {
+	} else if a.IsFalse() && b.IsNil() {
 		return -1
-	} else if a == false && b == true {
+	} else if a.IsFalse() && b.IsTrue() {
 		return -1
-	} else if a == nil && b == false {
+	} else if a.IsNil() && b.IsFalse() {
 		return -1
-	} else if a == nil && b == nil {
+	} else if a.IsNil() && b.IsNil() {
 		return 0
-	} else if a == nil && b == true {
+	} else if a.IsNil() && b.IsTrue() {
 		return -1
-	} else if a == true && b == false {
+	} else if a.IsTrue() && b.IsFalse() {
 		return -1
-	} else if a == true && b == nil {
+	} else if a.IsTrue() && b.IsNil() {
 		return 0
-	} else if a == true && b == true {
+	} else if a.IsTrue() && b.IsTrue() {
 		return 1
 	}
 	return 0
 }
 
-func or_trit(a trit, b trit) int8 {
-	if a == false && b == false {
+func or_trit(a trits, b trits) int8 {
+	if a.IsFalse() && b.IsFalse() {
 		return -1
-	} else if a == false && b == nil {
+	} else if a.IsFalse() && b.IsNil() {
 		return 0
-	} else if a == false && b == true {
+	} else if a.IsFalse() && b.IsTrue() {
 		return 1
-	} else if a == nil && b == false {
+	} else if a.IsNil() && b.IsFalse() {
 		return 0
-	} else if a == nil && b == nil {
+	} else if a.IsNil() && b.IsNil() {
 		return 0
-	} else if a == nil && b == true {
+	} else if a.IsNil() && b.IsTrue() {
 		return 1
-	} else if a == true && b == false {
+	} else if a.IsTrue() && b.IsFalse() {
 		return 1
-	} else if a == true && b == nil {
+	} else if a.IsTrue() && b.IsNil() {
 		return 1
-	} else if a == true && b == true {
+	} else if a.IsTrue() && b.IsTrue() {
 		return 1
 	}
 	return 0
 }
 
-func xor_trit(a trit, b trit) int8 {
-	if a == false && b == false {
+func xor_trit(a trits, b trits) int8 {
+	if a.IsFalse() && b.IsFalse() {
 		return -1
-	} else if a == false && b == nil {
+	} else if a.IsFalse() && b.IsNil() {
 		return 0
-	} else if a == false && b == true {
+	} else if a.IsFalse() && b.IsTrue() {
 		return 1
-	} else if a == nil && b == false {
+	} else if a.IsNil() && b.IsFalse() {
 		return 0
-	} else if a == nil && b == nil {
+	} else if a.IsNil() && b.IsNil() {
 		return 0
-	} else if a == nil && b == true {
+	} else if a.IsNil() && b.IsTrue() {
 		return 0
-	} else if a == true && b == false {
+	} else if a.IsTrue() && b.IsFalse() {
 		return 1
-	} else if a == true && b == nil {
+	} else if a.IsTrue() && b.IsNil() {
 		return 0
-	} else if a == true && b == true {
+	} else if a.IsTrue() && b.IsTrue() {
 		return -1
 	}
 	return 0
@@ -1259,8 +1547,8 @@ func pow3(x int8) int32 {
 
 // Преобразование трита в целое число
 func trs2int(tr trs, p uint8) int8 {
-	if p > 31 {
-		p = 31
+	if p > TRITSMAX-1 {
+		p = TRITSMAX - 1
 	}
 	if (tr.t0 & (1 << p)) == 0 {
 		return 0
@@ -1275,8 +1563,8 @@ func trs2int(tr trs, p uint8) int8 {
 
 // Преобразование целое число в трит
 func int2trs(tr trs, p uint8, i int8) trs {
-	if p > 31 {
-		p = 31
+	if p > TRITSMAX-1 {
+		p = TRITSMAX - 1
 	}
 	if i > 0 {
 		tr.t1 |= (1 << p)
@@ -1295,8 +1583,8 @@ func int2trs(tr trs, p uint8, i int8) trs {
 
 //  Преобразовать трит в символ '-','0','+'
 func trs2symb(tr trs, p uint8, i int8) string {
-	if p > 31 {
-		p = 31
+	if p > TRITSMAX-1 {
+		p = TRITSMAX - 1
 	}
 	if tr.t0 == 0 {
 		return "0"
@@ -1312,8 +1600,8 @@ func trs2symb(tr trs, p uint8, i int8) string {
 // Операция знак SGN троичного числа
 func sgn_trs(x trs) int8 {
 	var i int8
-	if x.l > 31 {
-		x.l = 31
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
 	}
 	for i = int8(x.l) - 1; i >= 0; i -= 1 {
 		if ((x.t0 & (1 << i)) > 0) && ((x.t1 & (1 << i)) == 0) {
@@ -1332,8 +1620,12 @@ func and_trs(x trs, y trs) trs {
 	var i, j uint8
 	var a, b, s int8
 
-	x.l %= 32
-	y.l %= 32
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
+	}
+	if y.l > TRITSMAX-1 {
+		y.l = TRITSMAX - 1
+	}
 
 	if x.l >= y.l {
 		j = x.l
@@ -1358,8 +1650,12 @@ func or_trs(x trs, y trs) trs {
 	var i, j uint8
 	var a, b, s int8
 
-	x.l %= 32
-	y.l %= 32
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
+	}
+	if y.l > TRITSMAX-1 {
+		y.l = TRITSMAX - 1
+	}
 
 	if x.l >= y.l {
 		j = x.l
@@ -1384,8 +1680,12 @@ func xor_trs(x trs, y trs) trs {
 	var i, j uint8
 	var a, b, s int8
 
-	x.l %= 32
-	y.l %= 32
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
+	}
+	if y.l > TRITSMAX-1 {
+		y.l = TRITSMAX - 1
+	}
 
 	if x.l >= y.l {
 		j = x.l
@@ -1412,7 +1712,9 @@ func xor_trs(x trs, y trs) trs {
  * Возврат: Троичное число
  */
 func shift_trs(tr trs, d int8) trs {
-	tr.l %= 32
+	if tr.l > TRITSMAX-1 {
+		tr.l = TRITSMAX - 1
+	}
 	if d > 0 {
 		tr.t1 >>= d
 		tr.t0 >>= d
@@ -1429,13 +1731,12 @@ func add_trs(x trs, y trs) trs {
 	var a, b, s, p0, p1 int8
 	var r trs
 
-	if x.l > 31 {
-		x.l = 31
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
 	}
-	if y.l > 31 {
-		y.l = 31
+	if y.l > TRITSMAX-1 {
+		y.l = TRITSMAX - 1
 	}
-
 	if x.l >= y.l {
 		j = x.l
 	} else {
@@ -1470,13 +1771,12 @@ func sub_trs(x trs, y trs) trs {
 	var a, b, s, p0, p1 int8
 	var r trs
 
-	if x.l > 31 {
-		x.l = 31
+	if x.l > TRITSMAX-1 {
+		x.l = TRITSMAX - 1
 	}
-	if y.l > 31 {
-		y.l = 31
+	if y.l > TRITSMAX-1 {
+		y.l = TRITSMAX - 1
 	}
-
 	if x.l >= y.l {
 		j = x.l
 	} else {
@@ -1506,39 +1806,15 @@ func sub_trs(x trs, y trs) trs {
 }
 
 // Сложение  в  S (S)+(A*)=>(S)
-//func add_tr(x lts ,y lts ) lts  {
-//     return nil
-//}
-
 // Вычитание в  S (S)-(A*)=>(S)
-//func add_tr(x interface ,y interface ) interface  {
-//     return nil
-//}
-
 // Умножение 0 (S)=>(R); (A*)(R)=>(S)
-//func mulz_tr(x trs,y trs) trs {
-//     return nil
-//}
-
 // Умножение + (S)+(A*)(R)=>(S)
-//func mulp_tr(x trs,y trs) trs {
-//     return nil
-//}
-
 // Умножение - (A*)+(S)(R)=>(S)
-//func muln_tr(x trs,y trs) trs {
-//     return nil
-//}
-
 // Поразрядное умножение (A*)[x](S)=>(S)
-//func and_tr(x trs,y trs) trs {
-//     return nil
-//}
-
 // Посылка в R (A*)=>(R)
 // Нормализация	Норм.(S)=>(A*); (N)=>(S)
-
 // Аппаратный сброс.
+
 // Очистить память и регистры
 // виртуальной машины "Сетунь-1958"
 func reset_setun_1958() {
@@ -1575,111 +1851,57 @@ func reset_setun_1958() {
 // ---------------------------------------------------
 func main() {
 
-	fmt.Printf("Run funcs ---------------------\n")
+	fmt.Printf("Test ternary functions -----------\n")
 
-	fmt.Printf("- calculate trit  --------------\n")
-
+	fmt.Printf("- calculate trit-1  --------------\n")
 	// Троичные переменные
-	var a trit
-	var b trit
-	var c trit
-	var carry trit
+	var a trits
+	var b trits
+	var c trits
+	var carry trits
+	// Операции на тритами
+	a.SetNil()
+	b.SetFalse()
+	c.SetTrue()
+	carry.SetTrue()
 
-	a = nil
-	b = true
-	c = false
-	carry = true
+	fmt.Println(" Set trit:")
+	var s trits
+	s = s.SetTrue()
+	fmt.Println(s.SymbChar())
+	s = s.SetNil()
+	fmt.Println(s.SymbChar())
+	s = s.SetFalse()
+	fmt.Println(s.SymbChar())
 
-	fmt.Printf("a=%d, b=%d, c=%d, carry=%d   \n", trit2int(a), trit2int(b), trit2int(c), trit2int(carry))
+	s = s.Clear()
+	fmt.Println(s.SymbChar())
 
-	sf, sfc := add_full_t(a, b, carry)
+	var t3 trits
+	var t2 trits
+	t3 = t3.SetFalse()
+	t2 = t2.SetNil()
+	fmt.Println(cmp_trits(t3, t2))
+	t3 = t3.SetNil()
+	t2 = t2.SetNil()
+	fmt.Println(cmp_trits(t3, t2))
 
-	fmt.Printf("add_full_t( %d, %d, %d ) = %d,%d \n", trit2int(a), trit2int(b), trit2int(carry), trit2int(sf), trit2int(sfc))
+	fmt.Printf("- add_full_t    --------------\n")
+	var aa trits
+	var bb trits
+	var ccarry trits
+	aa = aa.SetFalse()
+	bb = bb.SetFalse()
+	sf, sfc := add_full_slowly_t(aa, bb, ccarry)
+	fmt.Println(sf, sfc)
 
-	fmt.Printf("- calculate tryte  --------------\n")
+	fmt.Printf("- calculate trits-32 --------------\n")
 	// Троичные переменные
-	var x tryte
-	var rx tryte
-	var z tryte
-
-	x[0] = true
-	x[1] = false
-	x[2] = nil
-	x[3] = true
-	x[4] = false
-	x[5] = nil
-
-	fmt.Printf("x = %v \n", printTryteInt(x[:]))
-	fmt.Printf("x = %v \n", printTryteSymb(x[:]))
-	rx = shift_ts(x, -5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryteInt(rx[:]))
-	fmt.Printf("shift_ts( x, %d ) = %v \n", -5, printTryteSymb(rx[:]))
-	x = z
-	x[5] = false
-	fmt.Printf("x = %v \n", printTryteInt(x[:]))
-	fmt.Printf("x = %v \n", printTryteSymb(x[:]))
-	rx = shift_ts(x, 5)
-	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteInt(rx[:]))
-	fmt.Printf("shift_ts( x, %d ) = %v \n", 5, printTryteSymb(rx[:]))
-
-	// test get_trit()
-	var t1 uint32
-	var t0 uint32
-	var p uint8
-
-	fmt.Printf("Test print trt:\n")
-	// -1
-	p = 0
-	t1 = t1 &^ (1 << p)
-	t0 |= (1 << p)
-	trt := get_trit(t1, t0, p)
-	fmt.Printf(" trt=% 2d\n", trt)
-	// 0
-	p = 0
-	t0 = t0 &^ 1
-	trt = get_trit(t1, t0, p)
-	fmt.Printf(" trt=% 2d\n", trt)
-	// 1
-	p = 0
-	t1 |= (1 << p)
-	t0 |= (1 << p)
-	trt = get_trit(t1, t0, p)
-	fmt.Printf(" trt=% 2d\n", trt)
-
-	// Сдвиг
-	fmt.Printf("Shift to the left {t1,t0}<<= 2:\n")
-	t1 <<= 2
-	t0 <<= 2
-	trt = get_trit(t1, t0, 2)
-	fmt.Printf(" shift trt=% 2d\n", trt)
+	// TODO
 
 	fmt.Printf("--- Operation Setun-1958 ---\n")
-
-	reset_setun_1958()
-	K = int2trs(K, 0, -1)
-	fmt.Println(K)
-	fmt.Println(sgn_trs(K))
-	K = int2trs(K, 0, 0)
-	fmt.Println(K)
-
-	K = int2trs(K, 0, 1)
-	fmt.Printf(" K=%v\n", K)
-	K = add_trs(K, K)
-	K = sub_trs(K, K)
-	fmt.Printf(" K=K+K=%v\n", K)
-
-	K = int2trs(K, 0, 1)
-	K = shift_trs(K, -1)
-	K = shift_trs(K, -3)
-	fmt.Println(K)
-	K = sub_trs(K, K)
-	fmt.Println(K)
-	K = shift_trs(K, 2)
-	fmt.Println(K)
-	K = shift_trs(K, 100)
-	fmt.Println(K)
-
-	fmt.Println(S)
+	// Троичные переменные
+	// TODO
 
 	fmt.Printf("--------------------------------\n")
 }
