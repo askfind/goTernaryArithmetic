@@ -1,19 +1,34 @@
-//  env CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 go build --ldflags '-linkmode external -extldflags "-static"' .
+/**
+ * Filename: 	goTernaryArithmetic.go
+ *
+ * Project:		Троичная арифметика на языке программирования Golang
+ *
+ * Create date: 28.08.2021
+ * Edit date:   13.04.2023
+ *
+ * Version:		1.01
+ */
+
+// Cross Platform Compilation for ARMv7
+// env CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 go build --ldflags '-linkmode external -extldflags "-static"' .
+//
 
 package main
 
-import (
-	"fmt"
-	"unsafe"
-)
-
 /*
 #cgo CFLAGS: -g -Wall
+#cgo LDFLAGS: -lm
+#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "./trslib.h"
 #include "./trslib.c"
 */
 import "C"
+
+import (
+	"fmt"
+)
 
 // Таб.1 Алфавит троичной симметричной системы счисления
 // +--------------------------+-------+-------+-------+
@@ -1866,18 +1881,24 @@ func testCallC() {
 
 	fmt.Println("-------------------------------")
 
-	name := C.CString("Gopher")
-	defer C.free(unsafe.Pointer(name))
+	// C Library
+	//mystr := C.CString("Hello from a C library function")
+	//C.myPrintFunction(mystr)
+	//defer C.free(unsafe.Pointer(mystr))
 
-	year := C.int(2018)
+	// Inline C
+	C.myPrintFunction2()
 
-	ptr := C.malloc(C.sizeof_char * 1024)
-	defer C.free(unsafe.Pointer(ptr))
+	// Inline C math
+	var X C.double
+	X = 0.5432
+	X = C.sin(X)
+	fmt.Println(X)
 
-	size := C.greet(name, year, (*C.char)(ptr))
-
-	b := C.GoBytes(ptr, size)
-	fmt.Println(string(b))
+	s2 := C.s2
+	fmt.Println(s2)
+	s1 := C.s1
+	fmt.Println(s1)
 
 	fmt.Println("-------------------------------")
 }
