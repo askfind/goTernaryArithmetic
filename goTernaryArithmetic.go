@@ -1,4 +1,31 @@
+/**
+ * Filename: 	goTernaryArithmetic.go
+ *
+ * Project:		Троичная арифметика на языке программирования Golang
+ *
+ * Create date: 28.08.2021
+ * Edit date:   13.04.2023
+ *
+ * Version:		1.01
+ *
+ */
+
+// Cross Platform Compilation for ARMv7
+// env CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 go build --ldflags '-linkmode external -extldflags "-static"' .
+//
+
 package main
+
+/*
+#cgo CFLAGS: -g -Wall
+#cgo LDFLAGS: -lm
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "./trslib.h"
+#include "./trslib.c"
+*/
+import "C"
 
 import (
 	"fmt"
@@ -28,7 +55,7 @@ import (
 //   - 19,683 функций вида F(A,B) = F(B,A)
 
 // ----------------------------------------------------
-// TRIT Arithmetic
+// TRIT Arithmetic  ver. 1.0
 // ----------------------------------------------------
 
 // Объявление троичных типов
@@ -1440,10 +1467,10 @@ func shift_ts(tr trs, d int8) trs {
 
 // Основные регистры в порядке пульта управления
 var (
-	K trs // K(1:9)  код команды (адрес ячейки оперативной памяти)
-	F trs // F(1:5)  индекс регистр
-	C trs // C(1:5)  программный счетчик
-	W trs // W(1:1)  знак троичного числа
+	K  trs // K(1:9)  код команды (адрес ячейки оперативной памяти)
+	F  trs // F(1:5)  индекс регистр
+	CR trs // C(1:5)  программный счетчик
+	W  trs // W(1:1)  знак троичного числа
 	//
 	ph1 trs // ph1(1:1) 1 разряд переполнения
 	ph2 trs // ph2(1:1) 2 разряд переполнения
@@ -1826,8 +1853,8 @@ func reset_setun_1958() {
 	K.l = 9
 	clear_full_trs(&F) /* F(1:5) */
 	F.l = 5
-	clear_full_trs(&C) /* K(1:5) */
-	C.l = 5
+	clear_full_trs(&CR) /* K(1:5) */
+	CR.l = 5
 	clear_full_trs(&W) /* W(1:1) */
 	W.l = 1
 	//
@@ -1846,10 +1873,45 @@ func reset_setun_1958() {
 	MR.l = 9
 }
 
+// -------------------------------------------------------
+// TRIT Arithmetic  ver. 2.0 for architectures ARM, RISC-V
+// -------------------------------------------------------
+
+// Вызов функций из библиотеки на С
+func testCallC() {
+
+	fmt.Println("-------------------------------")
+
+	// C Library
+	//mystr := C.CString("Hello from a C library function")
+	//C.myPrintFunction(mystr)
+	//defer C.free(unsafe.Pointer(mystr))
+
+	// Inline C
+	C.myPrintFunction2()
+
+	// Inline C math
+	var X C.double
+	X = 0.5432
+	X = C.sin(X)
+	fmt.Println(X)
+
+	s2 := C.s2
+	fmt.Println(s2)
+	s1 := C.s1
+	fmt.Println(s1)
+
+	fmt.Println("-------------------------------")
+}
+
 // ---------------------------------------------------
 // Main
 // ---------------------------------------------------
 func main() {
+
+	fmt.Printf("Test call function trslib -----------\n")
+
+	testCallC()
 
 	fmt.Printf("Test ternary functions -----------\n")
 
