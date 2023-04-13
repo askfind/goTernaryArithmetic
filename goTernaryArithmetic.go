@@ -1,8 +1,19 @@
+//  env CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 go build --ldflags '-linkmode external -extldflags "-static"' .
+
 package main
 
 import (
 	"fmt"
+	"unsafe"
 )
+
+/*
+#cgo CFLAGS: -g -Wall
+#include <stdlib.h>
+#include "./trslib.h"
+#include "./trslib.c"
+*/
+import "C"
 
 // Таб.1 Алфавит троичной симметричной системы счисления
 // +--------------------------+-------+-------+-------+
@@ -28,7 +39,7 @@ import (
 //   - 19,683 функций вида F(A,B) = F(B,A)
 
 // ----------------------------------------------------
-// TRIT Arithmetic
+// TRIT Arithmetic  ver. 1.0
 // ----------------------------------------------------
 
 // Объявление троичных типов
@@ -1440,10 +1451,10 @@ func shift_ts(tr trs, d int8) trs {
 
 // Основные регистры в порядке пульта управления
 var (
-	K trs // K(1:9)  код команды (адрес ячейки оперативной памяти)
-	F trs // F(1:5)  индекс регистр
-	C trs // C(1:5)  программный счетчик
-	W trs // W(1:1)  знак троичного числа
+	K  trs // K(1:9)  код команды (адрес ячейки оперативной памяти)
+	F  trs // F(1:5)  индекс регистр
+	CR trs // C(1:5)  программный счетчик
+	W  trs // W(1:1)  знак троичного числа
 	//
 	ph1 trs // ph1(1:1) 1 разряд переполнения
 	ph2 trs // ph2(1:1) 2 разряд переполнения
@@ -1826,8 +1837,8 @@ func reset_setun_1958() {
 	K.l = 9
 	clear_full_trs(&F) /* F(1:5) */
 	F.l = 5
-	clear_full_trs(&C) /* K(1:5) */
-	C.l = 5
+	clear_full_trs(&CR) /* K(1:5) */
+	CR.l = 5
 	clear_full_trs(&W) /* W(1:1) */
 	W.l = 1
 	//
@@ -1846,10 +1857,39 @@ func reset_setun_1958() {
 	MR.l = 9
 }
 
+// -------------------------------------------------------
+// TRIT Arithmetic  ver. 2.0 for architectures ARM, RISC-V
+// -------------------------------------------------------
+
+// Вызов функций из библиотеки на С
+func testCallC() {
+
+	fmt.Println("-------------------------------")
+
+	name := C.CString("Gopher")
+	defer C.free(unsafe.Pointer(name))
+
+	year := C.int(2018)
+
+	ptr := C.malloc(C.sizeof_char * 1024)
+	defer C.free(unsafe.Pointer(ptr))
+
+	size := C.greet(name, year, (*C.char)(ptr))
+
+	b := C.GoBytes(ptr, size)
+	fmt.Println(string(b))
+
+	fmt.Println("-------------------------------")
+}
+
 // ---------------------------------------------------
 // Main
 // ---------------------------------------------------
 func main() {
+
+	fmt.Printf("Test call function trslib -----------\n")
+
+	testCallC()
 
 	fmt.Printf("Test ternary functions -----------\n")
 
