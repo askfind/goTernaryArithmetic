@@ -7,6 +7,7 @@
  * Edit date:   13.04.2023
  *
  * Version:		1.01
+ *
  */
 
 // Cross Platform Compilation for ARMv7
