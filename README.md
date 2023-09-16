@@ -25,4 +25,14 @@ Then build goTernaryArithmetic.
 go build goTernaryArithmetic.go
 ```
 
+# History
+
+ > Project: Троичная арифметика на языке программирования Golang
+ >
+ > Create date: 28.08.2021
+ > Edit date:   13.04.2023
+ >
+ > Version:		1.01
+
+
 _To be continued..._
